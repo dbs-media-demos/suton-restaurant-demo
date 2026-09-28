@@ -31,6 +31,8 @@ export function Header({ locale, dict, primary, all, homeHref, reserveHref, altM
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [hover, setHover] = useState(0);
+  // The overlay's links and photos are only mounted once it has been opened.
+  const [mounted, setMounted] = useState(false);
   const lastY = useRef(0);
   const firstLink = useRef<HTMLAnchorElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -129,15 +131,28 @@ export function Header({ locale, dict, primary, all, homeHref, reserveHref, altM
             <button
               ref={toggleRef}
               type="button"
-              onClick={() => setOpen((v) => !v)}
+              onClick={() => {
+                setMounted(true);
+                setOpen((v) => !v);
+              }}
               aria-expanded={open}
               aria-controls="site-nav"
               aria-label={open ? dict.navClose : dict.navOpen}
               className="group grid h-11 w-11 place-items-center rounded-full border border-line text-cream transition-colors hover:border-cream"
             >
               <span className="relative block h-3 w-5">
-                <span className={clsx("absolute left-0 top-0 h-px w-full bg-current transition-transform duration-500 ease-[var(--ease-out-expo)]", open && "translate-y-1.5 rotate-45")} />
-                <span className={clsx("absolute bottom-0 left-0 h-px bg-current transition-all duration-500 ease-[var(--ease-out-expo)]", open ? "w-full -translate-y-1.5 -rotate-45" : "w-3 group-hover:w-full")} />
+                <span
+                  className={clsx(
+                    "absolute left-0 top-0 h-px w-full bg-current transition-transform duration-500 ease-[var(--ease-out-expo)]",
+                    open && "translate-y-1.5 rotate-45",
+                  )}
+                />
+                <span
+                  className={clsx(
+                    "absolute bottom-0 left-0 h-px bg-current transition-all duration-500 ease-[var(--ease-out-expo)]",
+                    open ? "w-full -translate-y-1.5 -rotate-45" : "w-3 group-hover:w-full",
+                  )}
+                />
               </span>
             </button>
           </div>
@@ -156,75 +171,79 @@ export function Header({ locale, dict, primary, all, homeHref, reserveHref, altM
         )}
         inert={!open}
       >
-        <div className="wrap grid flex-1 grid-cols-1 items-center gap-10 overflow-y-auto pb-8 pt-[calc(var(--header-h)+2rem)] lg:grid-cols-[1.15fr_1fr]">
-          <nav aria-label={dict.navLabel}>
-            <ul className="flex flex-col">
-              {all.map((l, i) => (
-                <li key={l.key} className="overflow-hidden">
-                  <Link
-                    ref={i === 0 ? firstLink : undefined}
-                    href={l.href}
-                    onMouseEnter={() => setHover(i)}
-                    onFocus={() => setHover(i)}
-                    className={clsx(
-                      "group flex items-baseline gap-4 py-1 transition-[transform,opacity,color] duration-[900ms] ease-[var(--ease-out-expo)]",
-                      open ? "translate-y-0 opacity-100" : "translate-y-full opacity-0",
-                      hover === i ? "text-cream" : "text-cream/55",
-                    )}
-                    style={{ transitionDelay: open ? `${250 + i * 45}ms` : "0ms" }}
-                    aria-current={pathname === l.href ? "page" : undefined}
-                  >
-                    <span className="t-eyebrow t-num w-7 text-candle/80">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="t-serif text-[clamp(1.7rem,3.3vw,2.75rem)] leading-[1.08] tracking-[-0.02em] transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:translate-x-3 group-hover:italic">
-                      {l.label}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+        {mounted && (
+          <>
+            <div className="wrap grid flex-1 grid-cols-1 items-center gap-10 overflow-y-auto pb-8 pt-[calc(var(--header-h)+2rem)] lg:grid-cols-[1.15fr_1fr]">
+              <nav aria-label={dict.navLabel}>
+                <ul className="flex flex-col">
+                  {all.map((l, i) => (
+                    <li key={l.key} className="overflow-hidden">
+                      <Link
+                        ref={i === 0 ? firstLink : undefined}
+                        href={l.href}
+                        onMouseEnter={() => setHover(i)}
+                        onFocus={() => setHover(i)}
+                        className={clsx(
+                          "group flex items-baseline gap-4 py-1 transition-[transform,opacity,color] duration-[900ms] ease-[var(--ease-out-expo)]",
+                          open ? "translate-y-0 opacity-100" : "translate-y-full opacity-0",
+                          hover === i ? "text-cream" : "text-cream/55",
+                        )}
+                        style={{ transitionDelay: open ? `${250 + i * 45}ms` : "0ms" }}
+                        aria-current={pathname === l.href ? "page" : undefined}
+                      >
+                        <span className="t-eyebrow t-num w-7 text-candle/80">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="t-serif text-[clamp(1.7rem,3.3vw,2.75rem)] leading-[1.08] tracking-[-0.02em] transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:translate-x-3 group-hover:italic">
+                          {l.label}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
 
-          <div className="relative hidden h-[min(72vh,44rem)] lg:block" aria-hidden>
+              <div className="relative hidden h-[min(72vh,44rem)] lg:block" aria-hidden>
+                <div
+                  className={clsx(
+                    "arch absolute inset-y-0 right-0 w-[min(100%,30rem)] overflow-hidden bg-char transition-[transform,opacity] duration-[1200ms] ease-[var(--ease-out-expo)]",
+                    open ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0",
+                  )}
+                  style={{ transitionDelay: open ? "300ms" : "0ms" }}
+                >
+                  {all.map((l, i) => (
+                    <Image
+                      key={l.key}
+                      src={l.image}
+                      alt=""
+                      fill
+                      sizes="30rem"
+                      quality={60}
+                      loading="lazy"
+                      className={clsx(
+                        "object-cover transition-[opacity,transform] duration-[900ms] ease-[var(--ease-out-expo)]",
+                        hover === i ? "scale-100 opacity-100" : "scale-110 opacity-0",
+                      )}
+                    />
+                  ))}
+                  <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
+                </div>
+              </div>
+            </div>
+
             <div
               className={clsx(
-                "arch absolute inset-y-0 right-0 w-[min(100%,30rem)] overflow-hidden bg-char transition-[transform,opacity] duration-[1200ms] ease-[var(--ease-out-expo)]",
-                open ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0",
+                "wrap grid gap-4 border-t border-line py-6 text-sm text-smoke transition-opacity duration-700 sm:grid-cols-3",
+                open ? "opacity-100" : "opacity-0",
               )}
-              style={{ transitionDelay: open ? "300ms" : "0ms" }}
+              style={{ transitionDelay: open ? "700ms" : "0ms" }}
             >
-              {all.map((l, i) => (
-                <Image
-                  key={l.key}
-                  src={l.image}
-                  alt=""
-                  fill
-                  sizes="30rem"
-                  quality={60}
-                  loading="lazy"
-                  className={clsx(
-                    "object-cover transition-[opacity,transform] duration-[900ms] ease-[var(--ease-out-expo)]",
-                    hover === i ? "scale-100 opacity-100" : "scale-110 opacity-0",
-                  )}
-                />
-              ))}
-              <div className="absolute inset-0 bg-gradient-to-t from-night/60 to-transparent" />
+              <OpenBadge dict={dict} className="text-cream" />
+              <p>{address}</p>
+              <a href={`tel:${site.phone}`} className="link-underline w-fit text-cream sm:justify-self-end">
+                {site.phoneDisplay}
+              </a>
             </div>
-          </div>
-        </div>
-
-        <div
-          className={clsx(
-            "wrap grid gap-4 border-t border-line py-6 text-sm text-smoke transition-opacity duration-700 sm:grid-cols-3",
-            open ? "opacity-100" : "opacity-0",
-          )}
-          style={{ transitionDelay: open ? "700ms" : "0ms" }}
-        >
-          <OpenBadge dict={dict} className="text-cream" />
-          <p>{address}</p>
-          <a href={`tel:${site.phone}`} className="link-underline w-fit text-cream sm:justify-self-end">
-            {site.phoneDisplay}
-          </a>
-        </div>
+          </>
+        )}
       </div>
     </>
   );

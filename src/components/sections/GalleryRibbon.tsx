@@ -19,7 +19,7 @@ export function GalleryRibbon({ rows, title, href, linkLabel, viewLabel }: { row
       if (prefersReducedMotion()) return;
       const tracks = gsap.utils.toArray<HTMLElement>("[data-row]", root.current);
       const tweens = tracks.map((t, i) =>
-        gsap.fromTo(t, { xPercent: i % 2 ? -50 : 0 }, { xPercent: i % 2 ? 0 : -50, duration: 55 + i * 10, ease: "none", repeat: -1 }),
+        gsap.fromTo(t, { xPercent: i % 2 ? -50 : 0 }, { xPercent: i % 2 ? 0 : -50, duration: 55 + i * 10, ease: "none", repeat: -1, paused: true }),
       );
       const skewTo = tracks.map((t) => gsap.quickTo(t, "skewX", { duration: 0.6, ease: "power3.out" }));
       ScrollTrigger.create({
@@ -32,6 +32,8 @@ export function GalleryRibbon({ rows, title, href, linkLabel, viewLabel }: { row
           tweens.forEach((tw) => gsap.to(tw, { timeScale: boost, duration: 0.2, overwrite: true, onComplete: () => void gsap.to(tw, { timeScale: 1, duration: 1.2 }) }));
           skewTo.forEach((fn) => fn(Math.max(-6, Math.min(6, v / -300))));
         },
+        // Only drift while the ribbon is on screen: no main-thread work otherwise.
+        onToggle: (self) => tweens.forEach((tw) => (self.isActive ? tw.play() : tw.pause())),
         onLeave: () => skewTo.forEach((fn) => fn(0)),
       });
     },
