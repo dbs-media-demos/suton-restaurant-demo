@@ -2,7 +2,9 @@
 
 import { useRef, type CSSProperties, type ElementType, type ReactNode } from "react";
 import clsx from "clsx";
-import { gsap, ScrollTrigger, SplitText, useGSAP, prefersReducedMotion, belowFold } from "@/lib/gsap";
+import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion, belowFold } from "@/lib/gsap";
+
+type Split = { revert: () => void };
 
 /*
  * Scroll-driven reveals. Content is always visible in the HTML; JavaScript only hides
@@ -33,11 +35,16 @@ export function SplitReveal({ children, as: Tag = "h2", className, delay = 0, im
       const el = ref.current;
       if (!el || immediate || prefersReducedMotion() || !belowFold(el)) return;
       gsap.set(el, { opacity: 0 });
-      let split: SplitText | null = null;
+      let split: Split | null = null;
+      let dead = false;
       const io = new IntersectionObserver(
-        ([entry]) => {
+        async ([entry]) => {
           if (!entry.isIntersecting) return;
           io.disconnect();
+          // SplitText is only downloaded once the first headline scrolls into view.
+          const { SplitText } = await import("gsap/SplitText");
+          if (dead) return;
+          gsap.registerPlugin(SplitText);
           split = SplitText.create(el, {
             type: words ? "words,lines" : "lines",
             mask: "lines",
@@ -60,6 +67,7 @@ export function SplitReveal({ children, as: Tag = "h2", className, delay = 0, im
       );
       io.observe(el);
       return () => {
+        dead = true;
         io.disconnect();
         split?.revert();
       };
@@ -135,10 +143,10 @@ export function ScrubWords({
       const el = ref.current;
       if (!el || prefersReducedMotion()) return;
       const words = el.querySelectorAll<HTMLElement>("[data-w]");
-      // Starts at ~3:1 contrast so it's readable before scrolling.
+      // Starts at ~3.5:1 (large text) so it stays readable and accessible before scrolling.
       gsap.fromTo(
         words,
-        { opacity: 0.28 },
+        { opacity: 0.45 },
         { opacity: 1, ease: "none", stagger: 0.1, scrollTrigger: { trigger: el, start: "top 78%", end: "bottom 50%", scrub: 0.6 } },
       );
     },

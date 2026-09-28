@@ -243,6 +243,11 @@ em.t-serif,
   100% { transform: translate(0, 0); }
 }
 
+/* Decorative giant words live in a pseudo-element so they're purely visual. */
+.deco-word::after {
+  content: attr(data-word);
+}
+
 /* Vignette for full-bleed media. */
 .vignette::after {
   content: "";
@@ -265,14 +270,12 @@ em.t-serif,
 }
 @keyframes letter-in {
   from {
-    opacity: 0.001;
-    transform: translateY(0.35em) rotate(4deg);
-    filter: blur(10px);
+    opacity: 0.18;
+    transform: translateY(0.3em) rotate(4deg);
   }
   to {
     opacity: 1;
     transform: none;
-    filter: blur(0);
   }
 }
 
@@ -282,7 +285,7 @@ em.t-serif,
 }
 @keyframes fade-up {
   from {
-    opacity: 0.001;
+    opacity: 0.15;
     transform: translateY(18px);
   }
   to {

@@ -107,9 +107,12 @@ export function FromTheFire({ locale, eyebrow, title, intro, chapters, alts, lin
             )}
             aria-labelledby={`ch-${c.id}`}
           >
-            <span data-num className="t-serif pointer-events-none absolute -top-6 right-0 select-none text-[34vw] leading-none text-cream/[0.035] md:right-auto md:top-auto md:left-[8vw] md:text-[30vw]" aria-hidden>
-              {c.n}
-            </span>
+            <span
+              data-num
+              data-word={c.n}
+              className="deco-word t-serif pointer-events-none absolute -top-6 right-0 select-none text-[34vw] leading-none text-cream/[0.035] md:right-auto md:top-auto md:left-[8vw] md:text-[30vw]"
+              aria-hidden
+            />
 
             <div className="relative aspect-[4/5] w-full md:aspect-auto md:h-[72svh] md:w-[42%]">
               <div data-back className={clsx("absolute inset-0 overflow-hidden bg-char", i % 2 === 0 ? "arch" : "rounded-[1.25rem]")}>

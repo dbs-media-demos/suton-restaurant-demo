@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
-import { Flip, gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { Flip } from "@/lib/flip";
 import { gallery, galleryCats, type GalleryCat } from "@/content/gallery";
 import { photos } from "@/content/photos";
 import type { Locale } from "@/lib/i18n";

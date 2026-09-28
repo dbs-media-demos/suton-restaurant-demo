@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import clsx from "clsx";
-import { Flip, gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { Flip } from "@/lib/flip";
 import { menu, dietLabels, dietShort, type Diet } from "@/content/menu";
 import type { Locale } from "@/lib/i18n";
 import { DishRows } from "./DishRows";

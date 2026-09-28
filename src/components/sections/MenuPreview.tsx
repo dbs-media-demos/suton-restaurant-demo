@@ -27,12 +27,11 @@ export function MenuPreview({ locale, eyebrow, title, text, cta, href }: { local
           <DishRows dishes={signatureDishes} locale={locale} theme="paper" />
         </Reveal>
       </div>
-      <p
-        className="t-serif pointer-events-none absolute -bottom-[0.18em] right-[-0.04em] select-none text-[24vw] italic leading-none text-ink/[0.045]"
+      <span
+        className="deco-word t-serif pointer-events-none absolute -bottom-[0.18em] right-[-0.04em] select-none text-[24vw] italic leading-none text-ink/[0.045]"
+        data-word={locale === "sr" ? "jesen" : "autumn"}
         aria-hidden
-      >
-        {locale === "sr" ? "jesen" : "autumn"}
-      </p>
+      />
     </section>
   );
 }

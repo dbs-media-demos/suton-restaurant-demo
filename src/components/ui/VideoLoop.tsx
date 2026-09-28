@@ -37,23 +37,43 @@ export function VideoLoop({ name, poster, posterAlt = "", sizes, className, eage
     if (reduce || saveData) return;
 
     let visible = false;
+    // Never compete with the first paint: wait for `load`, then an idle moment.
+    let ready = document.readyState === "complete" && !eager;
+    const attach = () => {
+      if (!ready || !visible) return;
+      setSrc(`/video/${name}.mp4`);
+      v.play().catch(() => {});
+    };
     const io = new IntersectionObserver(
       ([entry]) => {
         visible = entry.isIntersecting;
-        if (visible) {
-          setSrc(`/video/${name}.mp4`);
-          v.play().catch(() => {});
-        } else {
-          v.pause();
-        }
+        if (visible) attach();
+        else v.pause();
       },
       { rootMargin: eager ? "0px" : "300px 0px" },
     );
     io.observe(el);
+    let idle: number | undefined;
+    const onLoad = () => {
+      const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 300));
+      idle = ric(
+        () => {
+          ready = true;
+          attach();
+        },
+        { timeout: 2500 },
+      ) as number;
+    };
+    if (!ready) {
+      if (document.readyState === "complete") onLoad();
+      else window.addEventListener("load", onLoad, { once: true });
+    }
     const onVis = () => (document.hidden ? v.pause() : visible && v.play().catch(() => {}));
     document.addEventListener("visibilitychange", onVis);
     return () => {
       io.disconnect();
+      window.removeEventListener("load", onLoad);
+      if (idle !== undefined) (window.cancelIdleCallback ?? window.clearTimeout)(idle);
       document.removeEventListener("visibilitychange", onVis);
     };
   }, [name, eager]);

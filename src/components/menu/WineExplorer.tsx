@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import clsx from "clsx";
-import { Flip, gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { Flip } from "@/lib/flip";
 import { regions, wines, colorLabels, type RegionId, type WineColor } from "@/content/wines";
 import { formatRsd } from "@/content/menu";
 import type { Locale } from "@/lib/i18n";
@@ -17,7 +18,7 @@ const swatch: Record<WineColor, string> = {
   sweet: "#b8742a",
 };
 
-type Labels = { all: string; region: string; color: string; glass: string; bottle: string; count: string; home: string; mapLabel: string; allRegions: string };
+type Labels = { list: string; all: string; region: string; color: string; glass: string; bottle: string; count: string; home: string; mapLabel: string; allRegions: string };
 
 /** Wine list filterable by region (on a river map) and by colour, animated with FLIP. */
 export function WineExplorer({ locale, labels }: { locale: Locale; labels: Labels }) {
@@ -69,6 +70,7 @@ export function WineExplorer({ locale, labels }: { locale: Locale; labels: Label
       </aside>
 
       <div>
+        <h2 className="sr-only">{labels.list}</h2>
         <div className="flex flex-col gap-4 border-b border-line pb-6">
           <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1" role="group" aria-label={labels.region}>
             <Chip on={!region} onClick={() => animate(() => setRegion(null))}>

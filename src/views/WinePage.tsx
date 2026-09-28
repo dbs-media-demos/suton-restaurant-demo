@@ -19,6 +19,7 @@ const copy = {
     h1: "Četiri regiona, jedna reka, 180 etiketa.",
     intro: "Izaberite region na mapi ili boju vina. U nastavku je izbor sa karte; ceo podrum od 180 etiketa donosi vam sommelier za stolom.",
     labels: {
+      list: "Izbor sa vinske karte",
       all: "Svi regioni",
       region: "Region",
       color: "Boja",
@@ -43,6 +44,7 @@ const copy = {
     h1: "Four regions, one river, 180 labels.",
     intro: "Pick a region on the map or a wine colour. Below is a selection from the list; the sommelier brings the full 180-label cellar to your table.",
     labels: {
+      list: "A selection from the wine list",
       all: "All regions",
       region: "Region",
       color: "Colour",

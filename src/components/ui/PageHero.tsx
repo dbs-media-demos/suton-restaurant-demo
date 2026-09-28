@@ -26,7 +26,7 @@ export function PageHero({ crumbs, crumbLabel, eyebrow, title, intro, image, vid
     video && image ? (
       <VideoLoop name={video} poster={image} posterAlt={imageAlt} sizes={wide ? "100vw" : "(min-width: 768px) 40vw, 90vw"} eager preloadPoster />
     ) : image ? (
-      <Photo k={image} alt={imageAlt} sizes={wide ? "100vw" : "(min-width: 768px) 40vw, 90vw"} preload quality={75} className="anim-zoom" />
+      <Photo k={image} alt={imageAlt} sizes={wide ? "100vw" : "(min-width: 768px) 32vw, 90vw"} preload quality={60} className="anim-zoom" />
     ) : null;
 
   return (

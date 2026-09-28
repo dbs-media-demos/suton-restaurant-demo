@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, useGSAP, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { VideoLoop } from "@/components/ui/VideoLoop";
 import { OpenBadge } from "@/components/layout/OpenBadge";
 import { Magnetic } from "@/components/ui/Magnetic";
@@ -52,9 +52,22 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story }: P
       const full = () => "inset(0px 0px 0px 0px round 0px 0px 0px 0px)";
 
       if (reduce) {
-        gsap.set(frame, { clipPath: arch() });
-        gsap.set("[data-title]", { autoAlpha: 0 });
-        gsap.set("[data-story]", { opacity: 1, y: 0 });
+        // No motion: swap between the two states instantly as you scroll past the midpoint.
+        let storyOn = false;
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top top",
+          end: "bottom bottom",
+          onUpdate: (self) => {
+            const on = self.progress > 0.3;
+            if (on === storyOn) return;
+            storyOn = on;
+            gsap.set(frame, { clipPath: on ? arch() : full() });
+            gsap.set("[data-title]", { autoAlpha: on ? 0 : 1 });
+            gsap.set("[data-shade]", { opacity: on ? 0 : 1 });
+            gsap.set("[data-story], [data-ring]", { opacity: on ? 1 : 0, y: 0 });
+          },
+        });
         return;
       }
 
