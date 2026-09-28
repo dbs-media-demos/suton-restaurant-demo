@@ -54,15 +54,24 @@ export function VideoLoop({ name, poster, posterAlt = "", sizes, className, eage
     );
     io.observe(el);
     let idle: number | undefined;
+    let timer: number | undefined;
+    const go = () => {
+      if (ready) return;
+      ready = true;
+      attach();
+    };
+    // Phones: an above-the-fold film waits for the first touch or scroll (or a few seconds),
+    // so the poster and title own the first paint and no data is spent up front.
+    const interactions = ["pointerdown", "touchstart", "scroll", "keydown"] as const;
+    const deferToInteraction = eager && window.matchMedia("(pointer: coarse)").matches;
     const onLoad = () => {
+      if (deferToInteraction) {
+        interactions.forEach((e) => window.addEventListener(e, go, { once: true, passive: true }));
+        timer = window.setTimeout(go, 6000);
+        return;
+      }
       const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 300));
-      idle = ric(
-        () => {
-          ready = true;
-          attach();
-        },
-        { timeout: 2500 },
-      ) as number;
+      idle = ric(go, { timeout: 2500 }) as number;
     };
     if (!ready) {
       if (document.readyState === "complete") onLoad();
@@ -74,6 +83,8 @@ export function VideoLoop({ name, poster, posterAlt = "", sizes, className, eage
       io.disconnect();
       window.removeEventListener("load", onLoad);
       if (idle !== undefined) (window.cancelIdleCallback ?? window.clearTimeout)(idle);
+      window.clearTimeout(timer);
+      interactions.forEach((e) => window.removeEventListener(e, go));
       document.removeEventListener("visibilitychange", onVis);
     };
   }, [name, eager]);
