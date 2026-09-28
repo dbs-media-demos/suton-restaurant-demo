@@ -1,26 +1,450 @@
 @import "tailwindcss";
 
+/* ────────────────────────────────────────────────────────────────
+   Suton — design tokens
+   Night (warm charcoal), smoked oak, vranac (wine red),
+   candle (amber), cream type and a printed-menu paper.
+   ──────────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --night: #0e0c0a;
+  --char: #1a1714;
+  --char-2: #231f1b;
+  --oak: #4a3a2c;
+  --vranac: #6e1f2a;
+  --vranac-2: #8c2a37;
+  --candle: #e3a857;
+  --candle-2: #f0c27d;
+  --cream: #f1e7d6;
+  --smoke: #b5a893;
+  --paper: #efe6d6;
+  --paper-2: #e4d8c4;
+  --ink: #1a1714;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-silk: cubic-bezier(0.65, 0.05, 0.36, 1);
+
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --header-h: 4.75rem;
+}
+
+.theme-night {
+  --bg: var(--night);
+  --fg: var(--cream);
+  --muted: var(--smoke);
+  --line: color-mix(in oklab, var(--cream) 14%, transparent);
+  --surface: var(--char);
+  --accent: var(--candle);
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+.theme-paper {
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --muted: #5e5246;
+  --line: color-mix(in oklab, var(--ink) 16%, transparent);
+  --surface: var(--paper-2);
+  /* Darker amber-red for text on paper (4.5:1+). */
+  --accent: #8a2432;
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-night: var(--night);
+  --color-char: var(--char);
+  --color-char-2: var(--char-2);
+  --color-oak: var(--oak);
+  --color-vranac: var(--vranac);
+  --color-vranac-2: var(--vranac-2);
+  --color-candle: var(--candle);
+  --color-candle-2: var(--candle-2);
+  --color-cream: var(--cream);
+  --color-smoke: var(--smoke);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+
+  --font-serif: var(--font-bodoni), "Bodoni 72", Didot, Georgia, serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-expo: var(--ease-out-expo);
+  --ease-quart: var(--ease-in-out-quart);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─────────────────────────── base ─────────────────────────── */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--candle);
+  color: var(--night);
+}
+
+:focus-visible {
+  outline: 2px solid var(--candle);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.theme-paper :focus-visible {
+  outline-color: var(--vranac);
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ─────────────────────────── layout ─────────────────────────── */
+
+.wrap {
+  width: 100%;
+  max-width: 100rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ───────────────────────── typography ───────────────────────── */
+
+.t-serif {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-weight: 400;
+}
+.t-display {
+  font-family: var(--font-serif);
+  font-size: clamp(5.5rem, 21vw, 22rem);
+  line-height: 0.82;
+  letter-spacing: -0.035em;
+  font-weight: 400;
+  font-variation-settings: "opsz" 96;
+}
+.t-h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 8.4vw, 8.75rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  font-weight: 400;
+  font-variation-settings: "opsz" 96;
+  text-wrap: balance;
+}
+.t-h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(2.35rem, 5.4vw, 5.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  font-weight: 400;
+  font-variation-settings: "opsz" 72;
+  text-wrap: balance;
+}
+.t-h3 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.55rem, 2.5vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+  font-variation-settings: "opsz" 40;
+}
+.t-lead {
+  font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.t-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.t-num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+em.t-serif,
+.t-italic {
+  font-style: italic;
+}
+
+/* ─────────────────────────── shapes ─────────────────────────── */
+
+/* A semicircular top on any element taller than half its width: the Suton arch. */
+.arch {
+  border-radius: 9999px 9999px 0 0;
+}
+.arch-soft {
+  border-radius: 9999px 9999px 1.25rem 1.25rem;
+}
+
+.hairline {
+  height: 1px;
+  background: var(--line);
+}
+
+/* ────────────────────────── grain ────────────────────────── */
+
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: -50%;
+  z-index: 190;
+  width: 200%;
+  height: 200%;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-6%, 4%); }
+  40% { transform: translate(4%, -8%); }
+  60% { transform: translate(-9%, -2%); }
+  80% { transform: translate(7%, 6%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Vignette for full-bleed media. */
+.vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 40%, transparent 40%, rgb(14 12 10 / 0.75) 100%),
+    linear-gradient(to bottom, rgb(14 12 10 / 0.45), transparent 22%, transparent 60%, rgb(14 12 10 / 0.9));
+}
+
+/* ───────────────────── CSS-only intro motion ─────────────────────
+   Above-the-fold content animates without JavaScript, starting partly
+   visible so LCP never waits for hydration. */
+
+.anim-letter {
+  display: inline-block;
+  animation: letter-in 1.6s var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 70ms + var(--d, 0s));
+}
+@keyframes letter-in {
+  from {
+    opacity: 0.001;
+    transform: translateY(0.35em) rotate(4deg);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.anim-fade {
+  animation: fade-up 1.4s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes fade-up {
+  from {
+    opacity: 0.001;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-heading {
+  animation: heading-in 1.5s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes heading-in {
+  from {
+    opacity: 0.12;
+    transform: translateY(0.25em);
+    clip-path: inset(0 0 35% 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 -20% 0);
+  }
+}
+
+.anim-zoom {
+  animation: zoom-out 2.6s var(--ease-out-expo) both;
+}
+@keyframes zoom-out {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Candle flicker for small glowing dots. */
+.flicker {
+  animation: flicker 2.8s ease-in-out infinite;
+}
+@keyframes flicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  22% { opacity: 0.78; transform: scale(0.92); }
+  45% { opacity: 1; transform: scale(1.06); }
+  70% { opacity: 0.85; transform: scale(0.97); }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2.2s var(--ease-out-expo) infinite;
+}
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgb(227 168 87 / 0.55); }
+  100% { box-shadow: 0 0 0 10px rgb(227 168 87 / 0); }
+}
+
+@keyframes scrollcue {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(200%); }
+}
+
+/* ───────────────────────── marquee ───────────────────────── */
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--speed, 40s) linear infinite;
+}
+.marquee[data-reverse] {
+  animation-direction: reverse;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ───────────────────────── links ───────────────────────── */
+
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.6s var(--ease-out-expo);
+}
+.link-underline:hover,
+.link-underline:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* ──────────────────────── view transitions ──────────────────────── */
+
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* The old page sinks and darkens; the new one rises through an arch, like the sun reversed. */
+::view-transition-old(.page) {
+  animation: page-out 650ms var(--ease-in-out-quart) both;
+}
+::view-transition-new(.page) {
+  animation: page-in 1100ms var(--ease-out-expo) 160ms both;
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-3vh) scale(0.97);
+  }
+}
+@keyframes page-in {
+  from {
+    clip-path: inset(100% 0 0 0 round 50vw 50vw 0 0);
+    transform: translateY(10vh);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 0 0 0 0);
+    transform: none;
+  }
+}
+
+::view-transition-group(.morph) {
+  animation-duration: 800ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+
+/* ─────────────────────── reduced motion ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  .grain {
+    animation: none;
+  }
+  .marquee {
+    animation: none;
+  }
 }
