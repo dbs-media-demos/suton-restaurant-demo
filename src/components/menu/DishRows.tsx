@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
-import { gsap, isTouch, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { useMediaQuery } from "@/lib/hooks";
 import { photos } from "@/content/photos";
 import { dietLabels, dietShort, formatRsd, type Dish } from "@/content/menu";
 import type { Locale } from "@/lib/i18n";
@@ -16,11 +17,7 @@ export function DishRows({ dishes, locale, theme = "night" }: { dishes: Dish[]; 
   const floatRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
-  const [hoverable, setHoverable] = useState(false);
-
-  useEffect(() => {
-    setHoverable(!isTouch());
-  }, []);
+  const hoverable = useMediaQuery("(hover: hover) and (pointer: fine)");
 
   useEffect(() => {
     const el = floatRef.current;

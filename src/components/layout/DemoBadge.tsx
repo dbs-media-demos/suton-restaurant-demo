@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useClientValue } from "@/lib/hooks";
 import type { Dict } from "@/i18n/dict";
 import { site } from "@/lib/site";
 
@@ -8,15 +9,16 @@ const KEY = "suton-demo-badge-hidden";
 
 /** Small fixed "Concept site by DBS Media ↗" pill with a dismiss button. */
 export function DemoBadge({ dict }: { dict: Dict }) {
-  const [hidden, setHidden] = useState(false);
-
-  useEffect(() => {
+  const [dismissed, setHidden] = useState(false);
+  const stored = useClientValue(() => {
     try {
-      if (sessionStorage.getItem(KEY) === "1") setHidden(true);
-    } catch {}
-  }, []);
+      return sessionStorage.getItem(KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
 
-  if (hidden) return null;
+  if (dismissed || stored) return null;
 
   return (
     <div className="anim-fade fixed bottom-[5.6rem] left-3 z-[150] flex items-center rounded-full border border-cream/15 bg-night/80 pl-4 text-[0.78rem] text-cream shadow-[0_10px_40px_-10px_rgb(0_0_0/0.6)] backdrop-blur-md md:bottom-5 md:left-5" style={{ "--d": "2.2s" } as React.CSSProperties}>

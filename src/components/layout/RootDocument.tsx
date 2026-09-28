@@ -45,10 +45,8 @@ export function RootDocument({ locale, children }: { locale: Locale; children: R
 
   return (
     <html lang={localeMeta[locale].htmlLang} className={fontVariables} suppressHydrationWarning>
-      <head>
-        <JsonLd data={graph(restaurantSchema(locale, dict.brandLine), websiteSchema(locale, dict.brandLine))} />
-      </head>
       <body className="theme-night min-h-screen">
+        <JsonLd data={graph(restaurantSchema(locale, dict.brandLine), websiteSchema(locale, dict.brandLine))} />
         <a
           href="#main"
           className="t-eyebrow fixed left-4 top-4 z-[300] -translate-y-24 rounded-full bg-candle px-5 py-3 text-night focus:translate-y-0"

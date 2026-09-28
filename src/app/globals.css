@@ -341,6 +341,14 @@ em.t-serif,
   to { transform: translateY(200%); }
 }
 
+.river-flow {
+  stroke-dasharray: 7 5;
+  animation: river-flow 2.8s linear infinite;
+}
+@keyframes river-flow {
+  to { stroke-dashoffset: -24; }
+}
+
 /* ───────────────────────── marquee ───────────────────────── */
 
 .marquee {

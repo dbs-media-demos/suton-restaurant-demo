@@ -10,7 +10,7 @@ import { ReviewsStrip } from "@/components/sections/ReviewsStrip";
 import { EventsStack } from "@/components/sections/EventsStack";
 import { GalleryRibbon } from "@/components/sections/GalleryRibbon";
 import { CtaBand } from "@/components/sections/CtaBand";
-import { chapters } from "@/content/story";
+import { chapters, chapterAlts } from "@/content/story";
 import { getDictionary } from "@/i18n/dict";
 import type { Locale } from "@/lib/i18n";
 import { pageHref, pagePaths } from "@/lib/routes";
@@ -71,13 +71,6 @@ const copy = {
     reviews: { eyebrow: "Utisci gostiju", title: "Ono što gosti pišu posle poslednje čaše.", link: "Svi utisci" },
     events: { eyebrow: "Događaji i proslave", title: "Večeri koje se prepričavaju.", more: "Privatne proslave i upiti", cta: "Detalji" },
     gallery: { title: "Iza kulisa i za stolom.", link: "Galerija" },
-    fireAlts: {
-      vatra: ["Meso na roštilju iznad otvorene vatre", "Žar od bukve u kuhinji Sutona"],
-      zemlja: ["Polje pšenice u Vojvodini", "Korpa sa sezonskim povrćem"],
-      ruke: ["Kuvar ručno slaže tanjir", "Sečenje domaćeg hleba"],
-      podrum: ["Vinski podrum sa hrastovim buradima", "Točenje crvenog vina u čaše"],
-      reka: ["Zalazak sunca nad rekom", "Terasa u sumrak"],
-    } as Record<string, [string, string]>,
     ribbon: [
       [
         { k: "dish/plating-spoon", alt: "Serviranje jela kašikom" },
@@ -150,13 +143,6 @@ const copy = {
     reviews: { eyebrow: "Guest reviews", title: "What guests write after the last glass.", link: "All reviews" },
     events: { eyebrow: "Events & private dining", title: "Evenings people talk about.", more: "Private dining & inquiries", cta: "Details" },
     gallery: { title: "Behind the pass and at the table.", link: "Gallery" },
-    fireAlts: {
-      vatra: ["Meat grilling over an open fire", "Beech embers in the Suton kitchen"],
-      zemlja: ["A wheat field in Vojvodina", "A basket of seasonal vegetables"],
-      ruke: ["A cook plating by hand", "Slicing homemade bread"],
-      podrum: ["A wine cellar with oak barrels", "Pouring red wine into glasses"],
-      reka: ["Sunset over the river", "The terrace at dusk"],
-    } as Record<string, [string, string]>,
     ribbon: [
       [
         { k: "dish/plating-spoon", alt: "Plating a dish with a spoon" },
@@ -212,7 +198,7 @@ export function HomePage({ locale }: { locale: Locale }) {
         title={c.fire.title}
         intro={c.fire.intro}
         chapters={chapters}
-        alts={c.fireAlts}
+        alts={chapterAlts[locale]}
         link={{ label: c.fire.link, href: pageHref(locale, "story") }}
       />
       <MenuPreview locale={locale} {...c.menu} href={pageHref(locale, "menu")} />

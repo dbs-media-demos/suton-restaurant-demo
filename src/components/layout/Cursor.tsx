@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap } from "@/lib/gsap";
+import { useMediaQuery } from "@/lib/hooks";
 
 /**
  * A small candle-flame cursor for mouse users. It grows into a labelled disc
@@ -10,13 +11,9 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 export function Cursor() {
   const ref = useRef<HTMLDivElement>(null);
   const [label, setLabel] = useState<string | null>(null);
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
-    if (!mq.matches || prefersReducedMotion()) return;
-    setEnabled(true);
-  }, []);
+  const fine = useMediaQuery("(hover: hover) and (pointer: fine)");
+  const reduce = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const enabled = fine && !reduce;
 
   useEffect(() => {
     const el = ref.current;

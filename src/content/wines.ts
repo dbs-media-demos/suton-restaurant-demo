@@ -8,7 +8,7 @@ export type Region = {
   name: Localized<string>;
   blurb: Localized<string>;
   grapes: string[];
-  /** Position on the stylised Serbia map (viewBox 0 0 300 400). */
+  /** Position on the stylised river map (viewBox 0 0 300 330). */
   pin: { x: number; y: number };
 };
 
@@ -21,7 +21,7 @@ export const regions: Region[] = [
       en: "Loess hills above the Danube, monasteries and Serbia's oldest wine tradition. Fresh whites and the legendary Bermet.",
     },
     grapes: ["Grašac", "Neoplanta", "Probus", "Bermet"],
-    pin: { x: 128, y: 70 },
+    pin: { x: 112, y: 86 },
   },
   {
     id: "sumadija",
@@ -31,7 +31,7 @@ export const regions: Region[] = [
       en: "The heart of Serbia: gentle slopes around Oplenac and Rudnik, rich reds and aromatic Tamjanika.",
     },
     grapes: ["Morava", "Tamjanika", "Cabernet Franc", "Prokupac"],
-    pin: { x: 148, y: 176 },
+    pin: { x: 146, y: 178 },
   },
   {
     id: "zupa",
@@ -41,7 +41,7 @@ export const regions: Region[] = [
       en: "A sheltered valley around Aleksandrovac, the warmest in the country. Home of Prokupac and black Tamjanika.",
     },
     grapes: ["Prokupac", "Tamjanika", "Začinak"],
-    pin: { x: 170, y: 250 },
+    pin: { x: 150, y: 250 },
   },
   {
     id: "negotin",
@@ -51,7 +51,7 @@ export const regions: Region[] = [
       en: "The far east, by the Danube and Timok: the stone wine cellars of Rajac and Rogljevo and wines that survive both heat and frost.",
     },
     grapes: ["Bagrina", "Crna Tamjanika", "Gamay", "Smederevka"],
-    pin: { x: 250, y: 150 },
+    pin: { x: 262, y: 176 },
   },
 ];
 

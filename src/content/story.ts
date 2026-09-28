@@ -173,3 +173,20 @@ export const team: TeamMember[] = [
     image: "people/sommelier-bottle",
   },
 ];
+
+export const chapterAlts: Record<"sr" | "en", Record<string, [string, string]>> = {
+  sr: {
+    vatra: ["Meso na roštilju iznad otvorene vatre", "Žar od bukve u kuhinji Sutona"],
+    zemlja: ["Polje pšenice u Vojvodini", "Korpa sa sezonskim povrćem"],
+    ruke: ["Kuvar ručno slaže tanjir", "Sečenje domaćeg hleba"],
+    podrum: ["Vinski podrum sa hrastovim buradima", "Točenje crvenog vina u čaše"],
+    reka: ["Zalazak sunca nad rekom", "Terasa u sumrak"],
+  },
+  en: {
+    vatra: ["Meat grilling over an open fire", "Beech embers in the Suton kitchen"],
+    zemlja: ["A wheat field in Vojvodina", "A basket of seasonal vegetables"],
+    ruke: ["A cook plating by hand", "Slicing homemade bread"],
+    podrum: ["A wine cellar with oak barrels", "Pouring red wine into glasses"],
+    reka: ["Sunset over the river", "The terrace at dusk"],
+  },
+};
