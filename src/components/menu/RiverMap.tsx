@@ -42,7 +42,7 @@ export function RiverMap({
       <g className="t-eyebrow" fontSize="7" letterSpacing="1.5" fill="currentColor">
         <text x="66" y="28" className="fill-smoke">DUNAV</text>
         <text x="30" y="122" className="fill-smoke">SAVA</text>
-        <text x="190" y="190" className="fill-smoke">MORAVA</text>
+        <text x="192" y="228" className="fill-smoke">MORAVA</text>
       </g>
       {/* Belgrade: where Suton is */}
       <g>
@@ -58,7 +58,14 @@ export function RiverMap({
           <>
             <circle cx={p.x} cy={p.y} r={on ? 22 : 0} fill="url(#pinGlow)" style={{ transition: "r .7s var(--ease-out-expo)" }} />
             <circle cx={p.x} cy={p.y} r={on ? 6 : 4.5} fill={on ? "var(--candle)" : "var(--night)"} stroke="var(--candle)" strokeWidth="1.5" style={{ transition: "r .5s var(--ease-out-expo), fill .3s" }} />
-            <text x={p.x + 10} y={p.y + 3} fontSize="9" className={on ? "fill-candle" : "fill-cream"} style={{ fontFamily: "var(--font-serif)" }}>
+            <text
+              x={p.x > 220 ? p.x - 10 : p.x + 10}
+              y={p.y + 3}
+              textAnchor={p.x > 220 ? "end" : "start"}
+              fontSize="9"
+              className={on ? "fill-candle" : "fill-cream"}
+              style={{ fontFamily: "var(--font-serif)" }}
+            >
               {p.label}
             </text>
           </>

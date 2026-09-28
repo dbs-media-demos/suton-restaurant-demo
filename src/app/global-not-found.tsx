@@ -23,10 +23,10 @@ export default function GlobalNotFound() {
           </Link>
         </header>
         <main className="wrap relative flex flex-1 flex-col items-center justify-center pb-24 text-center">
-          <div className="arch relative flex h-[min(46vh,22rem)] w-[min(60vw,16rem)] items-end justify-center overflow-hidden bg-char">
-            <Mark className="anim-fade mb-8 h-24 w-24 text-cream" />
-          </div>
-          <h1 className="t-display anim-heading -mt-10 text-[clamp(5rem,18vw,12rem)] text-candle">404</h1>
+          <Mark className="anim-fade h-20 w-20 text-cream" />
+          <h1 className="t-display anim-heading mt-4 text-[clamp(5rem,18vw,12rem)] italic text-candle" style={{ fontVariationSettings: '"opsz" 28' }}>
+            404
+          </h1>
           <div className="mt-8 grid max-w-3xl gap-10 sm:grid-cols-2 sm:text-left">
             <div>
               <p className="t-h3">{sr.title}</p>

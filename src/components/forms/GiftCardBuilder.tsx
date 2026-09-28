@@ -146,7 +146,7 @@ export function GiftCardBuilder({ locale }: { locale: Locale }) {
   }
 
   return (
-    <form noValidate onSubmit={submit} className="grid gap-12 lg:grid-cols-[1fr_24rem] lg:gap-16">
+    <form noValidate onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16">
       <div className="space-y-9">
         <fieldset>
           <legend className="t-h3">{t.choose}</legend>

@@ -44,7 +44,7 @@ export function WineExplorer({ locale, labels }: { locale: Locale; labels: Label
   const current = regions.find((r) => r.id === region);
 
   return (
-    <div className="grid gap-14 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-14 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-20">
       <aside className="lg:sticky lg:top-28 lg:self-start">
         <p className="t-eyebrow text-candle">{labels.region}</p>
         <RiverMap
