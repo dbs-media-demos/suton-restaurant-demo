@@ -4,7 +4,7 @@
 - Market / city: RS – Beograd (Savamala, on the Sava riverfront)
 - Languages: sr + en (Serbian Latin at `/`, English at `/en`, localized slugs + hreflang)
 - Live URL: https://suton-restaurant-demo.vercel.app
-- Repo: local only (git initialised; GitHub org/account still to be decided)
+- Repo: https://github.com/dbs-media-demos/suton-restaurant-demo (public, branch main)
 - Folder: DBS Media Portfolio/Demo Websites/restaurant
 - Stack: Next.js 16.3.6, React 19.2.8, Tailwind v4, GSAP 3 (ScrollTrigger, SplitText, Flip), Lenis, WebGL (hand-written shader)
 - Palette: #0E0C0A night · #1A1714 char · #4A3A2C smoked oak · #6E1F2A vranac · #E3A857 candle · #F1E7D6 cream · #B5A893 smoke · #EFE6D6 paper   Fonts: Bodoni Moda (display, opsz 96 + italic), Hanken Grotesk (UI/body)
