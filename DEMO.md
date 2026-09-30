@@ -1,6 +1,6 @@
-# Suton — kuhinja & vino (DBS Media demo)
+# Suton — kuhinja & vino (Scale by Noon demo)
 
-- Niche: restaurant & wine bar         (matches dbs-media.com industry id: restaurants)
+- Niche: restaurant & wine bar         (matches https://scale-by-noon.vercel.app industry id: restaurants)
 - Market / city: RS – Beograd (Savamala, on the Sava riverfront)
 - Languages: sr + en (Serbian Latin at `/`, English at `/en`, localized slugs + hreflang)
 - Live URL: https://suton-restaurant-demo.vercel.app

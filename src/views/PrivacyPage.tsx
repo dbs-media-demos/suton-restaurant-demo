@@ -12,7 +12,7 @@ const copy = {
     title: "Politika privatnosti",
     description: "Kako Suton prikuplja i koristi podatke iz rezervacija, upita, poklon kartica i newslettera.",
     updated: "Poslednja izmena: 28. septembar 2026.",
-    note: "Ovo je koncept sajt koji je izradio DBS Media. Suton je izmišljen restoran i nijedna forma na ovom sajtu ne šalje niti čuva podatke.",
+    note: "Ovo je koncept sajt koji je izradio Scale by Noon. Suton je izmišljen restoran i nijedna forma na ovom sajtu ne šalje niti čuva podatke.",
     sections: [
       { h: "Ko smo", p: `${site.fullName}, ${site.street}, ${site.city}. Za sva pitanja o privatnosti pišite na ${site.email}.` },
       { h: "Koje podatke prikupljamo", p: "Ime, telefon i email kada rezervišete sto, šaljete upit ili kupujete poklon karticu, kao i posebne napomene koje sami unesete (npr. alergije). Za newsletter čuvamo samo email adresu." },
@@ -26,7 +26,7 @@ const copy = {
     title: "Privacy policy",
     description: "How Suton collects and uses data from bookings, inquiries, gift cards and the newsletter.",
     updated: "Last updated: 28 September 2026.",
-    note: "This is a concept site created by DBS Media. Suton is a fictional restaurant and no form on this site sends or stores any data.",
+    note: "This is a concept site created by Scale by Noon. Suton is a fictional restaurant and no form on this site sends or stores any data.",
     sections: [
       { h: "Who we are", p: `${site.fullName}, ${site.street}, ${site.cityEn}. For any privacy question, email ${site.email}.` },
       { h: "What we collect", p: "Your name, phone and email when you book a table, send an inquiry or buy a gift card, plus any notes you add yourself (e.g. allergies). For the newsletter we keep only your email address." },

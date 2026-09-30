@@ -7,7 +7,7 @@ import { site } from "@/lib/site";
 
 const KEY = "suton-demo-badge-hidden";
 
-/** Small fixed "Concept site by DBS Media ↗" pill with a dismiss button. */
+/** Small fixed "Concept site by Scale by Noon ↗" pill with a dismiss button. */
 export function DemoBadge({ dict }: { dict: Dict }) {
   const [dismissed, setHidden] = useState(false);
   const stored = useClientValue(() => {

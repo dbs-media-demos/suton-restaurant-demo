@@ -1,6 +1,6 @@
 # Suton — kuhinja & vino
 
-DBS Media concept site for a fictional modern Balkan restaurant and wine bar on the Sava in Belgrade (Savamala).
+Scale by Noon concept site for a fictional modern Balkan restaurant and wine bar on the Sava in Belgrade (Savamala).
 Serbian (Latin) at `/`, English at `/en`. See `DEMO.md` for the handoff summary.
 
 ```bash

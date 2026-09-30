@@ -1,6 +1,6 @@
 /**
  * Business facts for the fictional restaurant, used across pages, structured data and OG images.
- * Suton is a DBS Media concept site: every name, number and review here is invented.
+ * Suton is a Scale by Noon concept site: every name, number and review here is invented.
  */
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://suton-restaurant-demo.vercel.app").replace(/\/$/, "");
 
@@ -27,7 +27,7 @@ export const site = {
   rating: { value: 4.8, count: 1184 },
   founded: 2019,
   instagram: "https://www.instagram.com/",
-  agencyUrl: "https://dbs-media.com",
+  agencyUrl: "https://scale-by-noon.vercel.app",
 } as const;
 
 export const absoluteUrl = (path = "/") => `${siteUrl}${path === "/" ? "" : path}`;
