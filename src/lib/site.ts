@@ -27,7 +27,7 @@ export const site = {
   rating: { value: 4.8, count: 1184 },
   founded: 2019,
   instagram: "https://www.instagram.com/",
-  agencyUrl: "https://scale-by-noon.vercel.app",
+  agencyUrl: "https://www.scalebynoon.com",
 } as const;
 
 export const absoluteUrl = (path = "/") => `${siteUrl}${path === "/" ? "" : path}`;
