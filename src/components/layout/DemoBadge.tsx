@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useClientValue } from "@/lib/hooks";
 import type { Dict } from "@/i18n/dict";
 import { site } from "@/lib/site";
+import { useBiz } from "@/components/preview/BizContext";
 
 const KEY = "suton-demo-badge-hidden";
 
 /** Small fixed "Concept site by Scale by Noon ↗" pill with a dismiss button. */
 export function DemoBadge({ dict }: { dict: Dict }) {
+  const biz = useBiz();
   const [dismissed, setHidden] = useState(false);
   const stored = useClientValue(() => {
     try {
@@ -24,7 +26,7 @@ export function DemoBadge({ dict }: { dict: Dict }) {
     <div className="anim-fade fixed bottom-[5.6rem] left-3 z-[150] flex items-center rounded-full border border-cream/15 bg-night/80 pl-4 text-[0.78rem] text-cream shadow-[0_10px_40px_-10px_rgb(0_0_0/0.6)] backdrop-blur-md md:bottom-5 md:left-5" style={{ "--d": "2.2s" } as React.CSSProperties}>
       <a href={site.agencyUrl} target="_blank" rel="noopener" className="flex h-9 items-center gap-2 hover:text-candle">
         <span className="h-1.5 w-1.5 rounded-full bg-candle" aria-hidden />
-        {dict.badge.text} <span aria-hidden>↗</span>
+        {biz.preview ? `Pregled za ${biz.shortName} · Scale by Noon` : dict.badge.text} <span aria-hidden>↗</span>
       </a>
       <button
         type="button"

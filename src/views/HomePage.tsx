@@ -16,6 +16,8 @@ import type { Locale } from "@/lib/i18n";
 import { pageHref, pagePaths } from "@/lib/routes";
 import { buildMetadata } from "@/lib/seo";
 import type { PhotoKey } from "@/content/photos";
+import { PreviewMap } from "@/components/preview/PreviewMap";
+import { num, openDays, type Biz } from "@/lib/biz-core";
 
 const copy = {
   sr: {
@@ -175,8 +177,42 @@ export const homeMetadata = (locale: Locale): Metadata =>
     photo: "/images/posters/hero.jpg",
   });
 
-export function HomePage({ locale }: { locale: Locale }) {
-  const c = copy[locale];
+/** A preview's own lines: its name and area, no Sava or Savamala, numbers that are true of it. */
+function previewCopy(biz: Biz) {
+  const c = copy.sr;
+  const days = openDays(biz);
+  return {
+    ...c,
+    h1: `${biz.name}, restoran — ${biz.area}`,
+    eyebrow: biz.area,
+    sub: "Domaća kuhinja, dobra vina i sto koji vas čeka.",
+    story: { ...c.story, aside: `VATRA · VINO · DRUŠTVO · ${biz.area.toUpperCase()} · ` },
+    manifesto: {
+      eyebrow: `${biz.shortName} · ${biz.area}`,
+      text: "Ono malo vremena kada grad uspori, kuhinja zamiriše, žar zapucketa, a mi otvorimo prvu bocu. Sve ostalo je samo izgovor da ostanete do kasno.",
+      pills: { 5: "room/candle-flowers", 8: "fire/embers-bright", 14: "wine/pour-red" } as Record<number, PhotoKey>,
+      footnotes: [
+        ...(biz.rating ? [{ n: `${num(biz, biz.rating.value)}★`, label: `od ${biz.rating.count} gostiju na Google-u` }] : []),
+        ...(days ? [{ n: String(days), label: "dana nedeljno radimo" }] : []),
+        { n: "1", label: "sto koji vas čeka" },
+      ],
+    },
+    // The river chapter is hidden on previews, so four things remain
+    fire: { ...c.fire, title: "Četiri stvari koje nas čine.", intro: "Nema gasa, nema mikrotalasne, nema prečica. Samo vatra, zemlja, ruke i podrum." },
+    wine: {
+      ...c.wine,
+      text: "Od lesnih brda Fruške gore do kamenih pivnica Negotina. Predstavićemo vam vina za koja možda nikada niste čuli, i koja nećete zaboraviti.",
+    },
+  };
+}
+
+/**
+ * The homepage. A personalised preview (/for/<token>, Serbian only) passes a real restaurant:
+ * its name runs across the hero, its rating, hours and a map of its address replace Suton's,
+ * and the Sava terrace, the river chapter and the dated events step aside.
+ */
+export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
+  const c = biz ? previewCopy(biz) : copy[locale];
   const dict = getDictionary(locale);
   const reserve = pageHref(locale, "reservations");
 
@@ -190,6 +226,8 @@ export function HomePage({ locale }: { locale: Locale }) {
         reserveHref={reserve}
         menuHref={pageHref(locale, "menu")}
         story={{ ...c.story, href: pageHref(locale, "story") }}
+        word={biz ? biz.shortName.toUpperCase() : undefined}
+        tagline={biz ? (biz.tagline ?? "Hrana. Vino. Društvo.") : undefined}
       />
       <Manifesto eyebrow={c.manifesto.eyebrow} text={c.manifesto.text} pills={c.manifesto.pills} footnotes={c.manifesto.footnotes} />
       <FromTheFire
@@ -197,17 +235,18 @@ export function HomePage({ locale }: { locale: Locale }) {
         eyebrow={c.fire.eyebrow}
         title={c.fire.title}
         intro={c.fire.intro}
-        chapters={chapters}
+        chapters={biz ? chapters.filter((ch) => ch.id !== "reka") : chapters}
         alts={chapterAlts[locale]}
         link={{ label: c.fire.link, href: pageHref(locale, "story") }}
       />
       <MenuPreview locale={locale} {...c.menu} href={pageHref(locale, "menu")} />
       <WineTeaser locale={locale} {...c.wine} href={pageHref(locale, "wine")} />
-      <RiverSunset locale={locale} {...c.river} href={reserve} />
-      <ReviewsStrip locale={locale} dict={dict} eyebrow={c.reviews.eyebrow} title={c.reviews.title} href={pageHref(locale, "reviews")} linkLabel={c.reviews.link} />
-      <EventsStack locale={locale} {...c.events} moreHref={pageHref(locale, "events")} />
+      {!biz && <RiverSunset locale={locale} {...c.river} href={reserve} />}
+      <ReviewsStrip locale={locale} dict={dict} eyebrow={c.reviews.eyebrow} title={c.reviews.title} href={pageHref(locale, "reviews")} linkLabel={c.reviews.link} biz={biz} />
+      {!biz && <EventsStack locale={locale} {...c.events} moreHref={pageHref(locale, "events")} />}
       <GalleryRibbon rows={c.ribbon} title={c.gallery.title} href={pageHref(locale, "gallery")} linkLabel={c.gallery.link} viewLabel={dict.cursor.view} />
-      <CtaBand dict={dict} reserveHref={reserve} />
+      {biz && <PreviewMap biz={biz} dict={dict} />}
+      <CtaBand dict={dict} reserveHref={reserve} biz={biz} />
     </PageShell>
   );
 }

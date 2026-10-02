@@ -16,6 +16,9 @@ type Props = {
   reserveHref: string;
   menuHref: string;
   story: { label: string; title: string; text: string; link: string; href: string; aside: string };
+  /** A preview's name and tagline instead of SUTON and the house tagline. */
+  word?: string;
+  tagline?: string;
 };
 
 const WORD = "SUTON";
@@ -24,7 +27,7 @@ const WORD = "SUTON";
  * Cinematic hero: a full-screen film with a letter-by-letter title (CSS-only, fast LCP).
  * On scroll the film shrinks into the Suton arch while the story opens around it.
  */
-export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story }: Props) {
+export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, word = WORD, tagline }: Props) {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -114,17 +117,22 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story }: P
           </p>
           <h1 id="hero-title" className="t-display mt-4 text-cream">
             <span className="sr-only">{h1}</span>
-            <span aria-hidden className="flex">
-              {WORD.split("").map((ch, i) => (
+            <span
+              aria-hidden
+              className="flex flex-wrap"
+              // Long names step down so they still fit across the screen (letter-spacing is re-set: the h1's is computed at its own size)
+              style={word.length > 7 ? { fontSize: `clamp(2.6rem, ${Math.max(5, 64 / word.length)}vw, 10rem)`, letterSpacing: "-0.02em" } : undefined}
+            >
+              {word.split("").map((ch, i) => (
                 <span key={i} className="anim-letter" style={{ "--i": i, "--d": "0.15s" } as React.CSSProperties}>
-                  {ch}
+                  {ch === " " ? "\u00a0" : ch}
                 </span>
               ))}
             </span>
           </h1>
           <div className="mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:justify-between">
             <div className="anim-fade max-w-md" style={{ "--d": "0.7s" } as React.CSSProperties}>
-              <p className="t-serif text-[clamp(1.5rem,2.6vw,2.2rem)] italic leading-tight text-candle">{dict.tagline}</p>
+              <p className="t-serif text-[clamp(1.5rem,2.6vw,2.2rem)] italic leading-tight text-candle">{tagline ?? dict.tagline}</p>
               <p className="mt-3 text-cream/85">{sub}</p>
             </div>
             <div className="anim-fade flex flex-wrap items-center gap-3" style={{ "--d": "0.9s" } as React.CSSProperties}>

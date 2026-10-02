@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/Button";
 import { OpenBadge } from "@/components/layout/OpenBadge";
 import { site } from "@/lib/site";
 import type { Dict } from "@/i18n/dict";
+import type { Biz } from "@/lib/biz-core";
 
 /** Closing call to action over candlelight. Used at the end of most pages. */
-export function CtaBand({ dict, reserveHref }: { dict: Dict; reserveHref: string }) {
+export function CtaBand({ dict, reserveHref, biz }: { dict: Dict; reserveHref: string; biz?: Biz }) {
   return (
     <section className="relative overflow-hidden" aria-labelledby="cta-title">
       <div className="absolute inset-0">
@@ -26,8 +27,8 @@ export function CtaBand({ dict, reserveHref }: { dict: Dict; reserveHref: string
             </Button>
             <p className="text-cream/80">
               {dict.cta.call}{" "}
-              <a href={`tel:${site.phone}`} className="link-underline text-cream">
-                {site.phoneDisplay}
+              <a href={`tel:${biz ? biz.phone : site.phone}`} className="link-underline text-cream">
+                {biz ? biz.phoneDisplay : site.phoneDisplay}
               </a>
             </p>
           </div>

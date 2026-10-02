@@ -1,4 +1,7 @@
+"use client";
+
 import clsx from "clsx";
+import { useBiz } from "@/components/preview/BizContext";
 
 /** Mark geometry, shared with the favicon and OG image. A half sun sinking into three river lines. */
 export const MARK = {
@@ -34,14 +37,18 @@ export function Mark({ className, animated }: { className?: string; animated?: b
 
 /** Mark + wordmark. `sub` adds the "kuhinja & vino" line. */
 export function Logo({ className, sub, subText = "kuhinja & vino" }: { className?: string; sub?: boolean; subText?: string }) {
+  const biz = useBiz();
   return (
     <span className={clsx("group inline-flex items-center gap-2.5", className)}>
       <Mark className="h-[1.9em] w-[1.9em]" animated />
       <span className="flex flex-col leading-none">
-        <span className="t-serif text-[1.35em] tracking-[0.28em]" style={{ fontVariationSettings: '"opsz" 60' }}>
-          SUTON
+        <span
+          className={clsx("t-serif text-[1.35em]", biz.preview ? "block max-w-[11rem] truncate pb-0.5 tracking-[0.12em] sm:max-w-[16rem]" : "tracking-[0.28em]")}
+          style={{ fontVariationSettings: '"opsz" 60' }}
+        >
+          {biz.preview ? biz.shortName.toUpperCase() : "SUTON"}
         </span>
-        {sub && <span className="t-eyebrow mt-1 whitespace-nowrap text-[0.5em] tracking-[0.34em] opacity-70">{subText}</span>}
+        {sub && <span className="t-eyebrow mt-1 whitespace-nowrap text-[0.5em] tracking-[0.34em] opacity-70">{biz.preview ? "restoran" : subText}</span>}
       </span>
     </span>
   );

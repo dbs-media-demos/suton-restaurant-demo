@@ -6,10 +6,11 @@ import { fmtTime, hoursRows, site, terraceSeason } from "@/lib/site";
 import { Newsletter } from "@/components/forms/Newsletter";
 import { OpenBadge } from "./OpenBadge";
 import { FooterSunset } from "./FooterSunset";
+import { DAY_NAMES, dayRange, weekFromMonday, type Biz } from "@/lib/biz-core";
 
 const exploreKeys: PageKey[] = ["menu", "wine", "reservations", "story", "producers", "gallery", "events", "gifts", "reviews", "faq", "contact"];
 
-export function Footer({ locale, dict }: { locale: Locale; dict: Dict }) {
+export function Footer({ locale, dict, biz }: { locale: Locale; dict: Dict; biz?: Biz }) {
   return (
     <footer className="theme-night relative border-t border-line pb-28 md:pb-6">
       <div className="wrap grid gap-14 pt-20 md:grid-cols-12 md:gap-8">
@@ -37,35 +38,54 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dict }) {
         <div className="md:col-span-3">
           <p className="t-eyebrow text-smoke">{dict.footer.visit}</p>
           <address className="mt-5 not-italic leading-relaxed text-cream/85">
-            {site.street}
-            <br />
-            {site.streetNote[locale]}, {site.neighbourhood}
-            <br />
-            {site.postalCode} {locale === "sr" ? site.city : site.cityEn}
+            {biz ? (
+              biz.address.full
+            ) : (
+              <>
+                {site.street}
+                <br />
+                {site.streetNote[locale]}, {site.neighbourhood}
+                <br />
+                {site.postalCode} {locale === "sr" ? site.city : site.cityEn}
+              </>
+            )}
           </address>
           <p className="mt-4 flex flex-col gap-1">
-            <a href={`tel:${site.phone}`} className="link-underline w-fit text-cream">
-              {site.phoneDisplay}
+            <a href={`tel:${biz ? biz.phone : site.phone}`} className="link-underline w-fit text-cream">
+              {biz ? biz.phoneDisplay : site.phoneDisplay}
             </a>
-            <a href={`mailto:${site.email}`} className="link-underline w-fit text-cream/85">
-              {site.email}
-            </a>
+            {!biz && (
+              <a href={`mailto:${site.email}`} className="link-underline w-fit text-cream/85">
+                {site.email}
+              </a>
+            )}
           </p>
           <div className="mt-6">
             <OpenBadge dict={dict} detail={false} className="text-cream" />
             <dl className="t-num mt-3 space-y-1 text-sm text-smoke">
-              {hoursRows.map((r) => (
-                <div key={r.days.en} className="flex justify-between gap-4">
-                  <dt>{r.days[locale]}</dt>
-                  <dd>
-                    {fmtTime(r.open)}–{fmtTime(r.close)}
-                  </dd>
-                </div>
-              ))}
-              <div className="flex justify-between gap-4 pt-1">
-                <dt>{dict.terrace}</dt>
-                <dd>{terraceSeason[locale]}</dd>
-              </div>
+              {biz ? (
+                weekFromMonday(biz.hours ?? []).map((h) => (
+                  <div key={h.day} className="flex justify-between gap-4">
+                    <dt>{DAY_NAMES[locale][h.day]}</dt>
+                    <dd>{dayRange(h, locale)}</dd>
+                  </div>
+                ))
+              ) : (
+                <>
+                  {hoursRows.map((r) => (
+                    <div key={r.days.en} className="flex justify-between gap-4">
+                      <dt>{r.days[locale]}</dt>
+                      <dd>
+                        {fmtTime(r.open)}–{fmtTime(r.close)}
+                      </dd>
+                    </div>
+                  ))}
+                  <div className="flex justify-between gap-4 pt-1">
+                    <dt>{dict.terrace}</dt>
+                    <dd>{terraceSeason[locale]}</dd>
+                  </div>
+                </>
+              )}
             </dl>
           </div>
         </div>
@@ -75,7 +95,7 @@ export function Footer({ locale, dict }: { locale: Locale; dict: Dict }) {
 
       <div className="wrap flex flex-col gap-3 border-t border-line pt-6 text-xs text-smoke md:flex-row md:items-center md:justify-between">
         <p>
-          © 2026 {site.fullName}. {dict.footer.demo}
+          {biz ? `© 2026 ${biz.name}. Pregled početne strane napravljen za ${biz.name}.` : `© 2026 ${site.fullName}. ${dict.footer.demo}`}
         </p>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
           <Link href={pageHref(locale, "privacy")} className="link-underline">

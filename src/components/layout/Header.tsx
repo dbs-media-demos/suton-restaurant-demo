@@ -10,6 +10,7 @@ import { OpenBadge } from "./OpenBadge";
 import type { Dict } from "@/i18n/dict";
 import { localeMeta, otherLocale, type Locale } from "@/lib/i18n";
 import { site } from "@/lib/site";
+import { useBiz } from "@/components/preview/BizContext";
 
 export type NavLink = { key: string; label: string; href: string; image: string };
 
@@ -26,6 +27,7 @@ type Props = {
 };
 
 export function Header({ locale, dict, primary, all, homeHref, reserveHref, altMap, otherLocaleHome, address }: Props) {
+  const biz = useBiz();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -92,7 +94,7 @@ export function Header({ locale, dict, primary, all, homeHref, reserveHref, altM
         style={{ viewTransitionName: "site-header" }}
       >
         <div className="wrap flex h-[var(--header-h)] items-center justify-between gap-4">
-          <Link href={homeHref} className="relative z-[2] text-[0.95rem] text-cream" aria-label={`${site.fullName}, ${dict.nav.home}`}>
+          <Link href={homeHref} className="relative z-[2] text-[0.95rem] text-cream" aria-label={`${biz.preview ? biz.name : site.fullName}, ${dict.nav.home}`}>
             <Logo sub subText={locale === "sr" ? "kuhinja & vino" : "kitchen & wine"} />
           </Link>
 
@@ -238,8 +240,8 @@ export function Header({ locale, dict, primary, all, homeHref, reserveHref, altM
             >
               <OpenBadge dict={dict} className="text-cream" />
               <p>{address}</p>
-              <a href={`tel:${site.phone}`} className="link-underline w-fit text-cream sm:justify-self-end">
-                {site.phoneDisplay}
+              <a href={`tel:${biz.phone}`} className="link-underline w-fit text-cream sm:justify-self-end">
+                {biz.phoneDisplay}
               </a>
             </div>
           </>

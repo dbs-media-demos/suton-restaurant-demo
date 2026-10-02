@@ -6,10 +6,14 @@ import { site } from "@/lib/site";
 import type { Locale } from "@/lib/i18n";
 import type { Dict } from "@/i18n/dict";
 import { ReviewCard } from "./ReviewCard";
+import type { Biz } from "@/lib/biz-core";
 
 /** Rating summary + an endless, hover-pausable ribbon of review cards. */
-export function ReviewsStrip({ locale, dict, eyebrow, title, href, linkLabel }: { locale: Locale; dict: Dict; eyebrow: string; title: string; href: string; linkLabel: string }) {
-  const list = reviews.slice(0, 6);
+export function ReviewsStrip({ locale, dict, eyebrow, title, href, linkLabel, biz }: { locale: Locale; dict: Dict; eyebrow: string; title: string; href: string; linkLabel: string; biz?: Biz }) {
+  const list = biz
+    ? reviews.filter((r) => r.name !== "Jelena M." && r.name !== "Thomas K.").slice(0, 6).map((r) => ({ ...r, from: { sr: biz.area, en: biz.area } }))
+    : reviews.slice(0, 6);
+  const rating = biz ? biz.rating : site.rating;
   return (
     <section className="relative overflow-hidden py-[clamp(6rem,12vw,11rem)]" aria-labelledby="reviews-title">
       <div className="wrap grid gap-10 md:grid-cols-[1fr_auto] md:items-end">
@@ -19,18 +23,20 @@ export function ReviewsStrip({ locale, dict, eyebrow, title, href, linkLabel }: 
             {title}
           </SplitReveal>
         </div>
+        {rating && (
         <Reveal className="flex items-center gap-6">
-          <p className="t-serif t-num text-[clamp(4rem,8vw,7rem)] leading-none text-candle">{site.rating.value.toLocaleString(locale === "sr" ? "de-DE" : "en-US")}</p>
+          <p className="t-serif t-num text-[clamp(4rem,8vw,7rem)] leading-none text-candle">{rating.value.toLocaleString(locale === "sr" ? "de-DE" : "en-US")}</p>
           <div>
-            <Stars value={site.rating.value} className="text-xl text-candle" />
+            <Stars value={rating.value} className="text-xl text-candle" />
             <p className="mt-2 text-sm text-smoke">
-              {site.rating.count.toLocaleString(locale === "sr" ? "de-DE" : "en-US")} {dict.rating.reviews} {dict.rating.on}
+              {rating.count.toLocaleString(locale === "sr" ? "de-DE" : "en-US")} {dict.rating.reviews} {dict.rating.on}
             </p>
             <Link href={href} className="link-underline mt-2 inline-block text-sm text-cream">
               {linkLabel} →
             </Link>
           </div>
         </Reveal>
+        )}
       </div>
 
       <div className="group mt-16 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">

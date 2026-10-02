@@ -1,14 +1,17 @@
+"use client";
+
 import Link from "next/link";
-import { site } from "@/lib/site";
+import { useBiz } from "@/components/preview/BizContext";
 import type { Dict } from "@/i18n/dict";
 
 /** Sticky bottom bar on phones: Call + Book. */
 export function MobileBar({ dict, reserveHref }: { dict: Dict; reserveHref: string }) {
+  const biz = useBiz();
   return (
     <div className="fixed inset-x-0 bottom-0 z-[100] border-t border-line bg-night/85 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl md:hidden">
       <div className="grid grid-cols-[1fr_1.6fr] gap-2.5">
         <a
-          href={`tel:${site.phone}`}
+          href={`tel:${biz.phone}`}
           className="flex h-12 items-center justify-center gap-2 rounded-full border border-line text-[0.95rem] text-cream"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
