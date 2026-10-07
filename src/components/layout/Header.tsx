@@ -194,7 +194,7 @@ export function Header({ locale, dict, primary, all, homeHref, reserveHref, altM
                         aria-current={pathname === l.href ? "page" : undefined}
                       >
                         <span className="t-eyebrow t-num w-7 text-candle/80">{String(i + 1).padStart(2, "0")}</span>
-                        <span className="t-serif text-[clamp(1.7rem,3.3vw,2.75rem)] leading-[1.08] tracking-[-0.02em] transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:translate-x-3 group-hover:italic">
+                        <span className="t-serif text-[clamp(1.7rem,3.3vw,2.75rem)] leading-[1.08] tracking-[-0.01em] transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:translate-x-3 group-hover:italic">
                           {l.label}
                         </span>
                       </Link>

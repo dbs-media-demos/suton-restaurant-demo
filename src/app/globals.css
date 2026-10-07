@@ -74,7 +74,7 @@
   --color-surface: var(--surface);
   --color-accent: var(--accent);
 
-  --font-serif: var(--font-bodoni), "Bodoni 72", Didot, Georgia, serif;
+  --font-serif: var(--font-display-serif), Georgia, serif;
   --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
 
   --ease-expo: var(--ease-out-expo);
@@ -148,42 +148,42 @@ button {
 
 .t-serif {
   font-family: var(--font-serif);
-  font-optical-sizing: auto;
   font-weight: 400;
 }
 .t-display {
   font-family: var(--font-serif);
-  font-size: clamp(5.5rem, 21vw, 22rem);
-  line-height: 0.82;
-  letter-spacing: -0.035em;
+  font-size: clamp(5rem, 19vw, 20rem);
+  line-height: 0.84;
+  letter-spacing: -0.02em;
   font-weight: 400;
-  font-variation-settings: "opsz" 96;
 }
 .t-h1 {
   font-family: var(--font-serif);
-  font-size: clamp(3rem, 8.4vw, 8.75rem);
-  line-height: 0.92;
-  letter-spacing: -0.03em;
+  font-size: clamp(2.6rem, 7.4vw, 7.75rem);
+  line-height: 0.95;
+  letter-spacing: -0.018em;
   font-weight: 400;
-  font-variation-settings: "opsz" 96;
   text-wrap: balance;
 }
 .t-h2 {
   font-family: var(--font-serif);
-  font-size: clamp(2.35rem, 5.4vw, 5.6rem);
-  line-height: 0.98;
-  letter-spacing: -0.025em;
+  font-size: clamp(2.1rem, 4.8vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.012em;
   font-weight: 400;
-  font-variation-settings: "opsz" 72;
   text-wrap: balance;
 }
 .t-h3 {
   font-family: var(--font-serif);
-  font-size: clamp(1.55rem, 2.5vw, 2.35rem);
-  line-height: 1.08;
-  letter-spacing: -0.015em;
+  font-size: clamp(1.45rem, 2.3vw, 2.15rem);
+  line-height: 1.1;
+  letter-spacing: -0.005em;
   font-weight: 400;
-  font-variation-settings: "opsz" 40;
+}
+.t-h1,
+.t-h2,
+.t-h3 {
+  overflow-wrap: break-word;
 }
 .t-lead {
   font-size: clamp(1.15rem, 1.5vw, 1.4rem);

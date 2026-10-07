@@ -19,7 +19,7 @@ export function Manifesto({ eyebrow, text, pills, footnotes }: { eyebrow: string
         <ScrubWords
           text={text}
           inserts={inserts}
-          className="t-serif mt-8 max-w-[22ch] text-[clamp(2.1rem,5.6vw,5.9rem)] leading-[1.04] tracking-[-0.025em] md:max-w-[20ch]"
+          className="t-serif mt-8 max-w-[22ch] text-[clamp(2rem,5.1vw,5.4rem)] leading-[1.06] tracking-[-0.012em] md:max-w-[20ch]"
         />
         <Reveal stagger={0.1} className="mt-16 grid grid-cols-2 gap-8 border-t border-line pt-8 md:grid-cols-4">
           {footnotes.map((f) => (

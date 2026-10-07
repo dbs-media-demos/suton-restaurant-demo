@@ -76,7 +76,7 @@ export function StoryPage({ locale }: { locale: Locale }) {
 
       <section className="py-[clamp(6rem,12vw,10rem)]">
         <div className="wrap">
-          <ScrubWords text={c.lead} className="t-serif max-w-[30ch] text-[clamp(1.7rem,3.4vw,3.3rem)] leading-[1.15] tracking-[-0.015em]" />
+          <ScrubWords text={c.lead} className="t-serif max-w-[30ch] text-[clamp(1.7rem,3.4vw,3.3rem)] leading-[1.2] tracking-[-0.005em]" />
         </div>
       </section>
 

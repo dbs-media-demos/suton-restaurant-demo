@@ -1,14 +1,17 @@
-import { Bodoni_Moda, Hanken_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
+import { Hanken_Grotesk } from "next/font/google";
 
-export const bodoni = Bodoni_Moda({
-  subsets: ["latin", "latin-ext"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-  variable: "--font-bodoni",
+// DM Serif Display (single weight 400, roman + italic), self-hosted as a subset:
+// Basic Latin + Latin-1 + Serbian Latin (č ć š ž đ) + typographic punctuation, kern/liga kept.
+// Two ~18 KB woff2 files, small enough to preload with the hero.
+export const displaySerif = localFont({
+  src: [
+    { path: "../fonts/DMSerifDisplay-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/DMSerifDisplay-Italic.woff2", weight: "400", style: "italic" },
+  ],
+  variable: "--font-display-serif",
   display: "swap",
-  // Four files (roman/italic × latin/latin-ext): let the CSS discover them instead of
-  // preloading, so they don't compete with the hero image and body font.
-  preload: false,
+  adjustFontFallback: "Times New Roman",
 });
 
 export const hanken = Hanken_Grotesk({
@@ -18,4 +21,4 @@ export const hanken = Hanken_Grotesk({
   display: "swap",
 });
 
-export const fontVariables = `${bodoni.variable} ${hanken.variable}`;
+export const fontVariables = `${displaySerif.variable} ${hanken.variable}`;

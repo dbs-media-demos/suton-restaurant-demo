@@ -2,16 +2,7 @@
 
 import clsx from "clsx";
 import { useBiz } from "@/components/preview/BizContext";
-
-/** Mark geometry, shared with the favicon and OG image. A half sun sinking into three river lines. */
-export const MARK = {
-  sun: "M14 37a18 18 0 0 1 36 0z",
-  lines: [
-    { x1: 9, x2: 55, y: 44 },
-    { x1: 17, x2: 47, y: 50.5 },
-    { x1: 25, x2: 39, y: 57 },
-  ],
-};
+import { MARK } from "./mark";
 
 export function Mark({ className, animated }: { className?: string; animated?: boolean }) {
   return (
@@ -44,7 +35,6 @@ export function Logo({ className, sub, subText = "kuhinja & vino" }: { className
       <span className="flex flex-col leading-none">
         <span
           className={clsx("t-serif text-[1.35em]", biz.preview ? "block max-w-[11rem] truncate pb-0.5 tracking-[0.12em] sm:max-w-[16rem]" : "tracking-[0.28em]")}
-          style={{ fontVariationSettings: '"opsz" 60' }}
         >
           {biz.preview ? biz.shortName.toUpperCase() : "SUTON"}
         </span>

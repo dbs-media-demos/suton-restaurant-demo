@@ -24,7 +24,7 @@ export default function GlobalNotFound() {
         </header>
         <main className="wrap relative flex flex-1 flex-col items-center justify-center pb-24 text-center">
           <Mark className="anim-fade h-20 w-20 text-cream" />
-          <h1 className="t-display anim-heading mt-4 text-[clamp(5rem,18vw,12rem)] italic text-candle" style={{ fontVariationSettings: '"opsz" 28' }}>
+          <h1 className="t-display anim-heading mt-4 text-[clamp(5rem,18vw,12rem)] italic text-candle">
             404
           </h1>
           <div className="mt-8 grid max-w-3xl gap-10 sm:grid-cols-2 sm:text-left">

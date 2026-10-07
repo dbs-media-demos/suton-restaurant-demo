@@ -34,10 +34,9 @@ export function FooterSunset() {
         <p
           className={
             biz.preview
-              ? "t-serif relative select-none px-4 text-center text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.03em] text-cream [overflow-wrap:anywhere]"
-              : "t-serif relative select-none text-center text-[27vw] leading-[0.78] tracking-[-0.04em] text-cream md:text-[24vw]"
+              ? "t-serif relative select-none px-4 text-center text-[clamp(3rem,11vw,11rem)] leading-[0.9] tracking-[-0.015em] text-cream [overflow-wrap:anywhere]"
+              : "t-serif relative select-none text-center text-[25vw] leading-[0.8] tracking-[-0.02em] text-cream md:text-[22vw]"
           }
-          style={{ fontVariationSettings: '"opsz" 96' }}
         >
           {biz.preview ? biz.shortName : "Suton"}
         </p>

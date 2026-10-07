@@ -7,7 +7,7 @@
 - Repo: https://github.com/dbs-media-demos/suton-restaurant-demo (public, branch main)
 - Folder: DBS Media Portfolio/Demo Websites/restaurant
 - Stack: Next.js 16.3.6, React 19.2.8, Tailwind v4, GSAP 3 (ScrollTrigger, SplitText, Flip), Lenis, WebGL (hand-written shader)
-- Palette: #0E0C0A night · #1A1714 char · #4A3A2C smoked oak · #6E1F2A vranac · #E3A857 candle · #F1E7D6 cream · #B5A893 smoke · #EFE6D6 paper   Fonts: Bodoni Moda (display, opsz 96 + italic), Hanken Grotesk (UI/body)
+- Palette: #0E0C0A night · #1A1714 char · #4A3A2C smoked oak · #6E1F2A vranac · #E3A857 candle · #F1E7D6 cream · #B5A893 smoke · #EFE6D6 paper   Fonts: DM Serif Display (display, 400 + italic; self-hosted subset woff2 in `src/fonts/`, preloaded), Hanken Grotesk (UI/body)
 - Pages: 32 routes (16 per language) + 404. Home, Menu, Wine list, Reservations, Our story, Producers, Gallery, Events & private dining, 3 event pages (Prokupac Night, From the Fire tasting menu, Sunday River Lunch), Gift cards, Reviews, FAQ, Contact, Privacy
 - Signature features:
   - Cinematic hero: a graded film montage (fire, grill, coals, wine pour, river at dusk) behind a letter-by-letter SUTON title; on scroll the film shrinks into the Suton arch while the story opens around it, with a rotating text ring
@@ -34,6 +34,7 @@ SR summary: Koncept sajt za moderan balkanski restoran i vinski bar u Savamali. 
 handoff/desktop-home.png, handoff/desktop-feature.png, handoff/mobile-home.png, handoff/scroll.mp4
 
 ## Notes
+- Fonts: DM Serif Display replaced Bodoni Moda on 2026-10-07 because Bodoni's hairlines were too thin and nearly vanished. Subset: Basic Latin, Latin-1, Serbian Latin (č ć š ž đ) and typographic punctuation, kern/liga kept (~18 KB per woff2). The OG route (`/api/og`) uses TTF subsets of the same font from `assets/fonts/`.
 - The business, people, farms, wineries, reviews and awards are fictional. Photos: Unsplash; videos: Pexels (see `public/images/SOURCES.md`).
 - Forms validate and show success states but send nothing.
 - On phones the hero film starts on the first touch/scroll (or after 6 s) so the first paint stays light; desktop starts it after load.

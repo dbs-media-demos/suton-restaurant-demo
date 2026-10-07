@@ -1,11 +1,11 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
-import { MARK } from "@/components/brand/Logo";
+import { MARK } from "@/components/brand/mark";
 
 // Brand fonts are read once at module scope; URLs relative to this file are traced into the bundle.
-const [bodoni, bodoniItalic, hanken] = await Promise.all([
-  readFile(new URL("../../../../assets/fonts/BodoniModa-Regular.ttf", import.meta.url)),
-  readFile(new URL("../../../../assets/fonts/BodoniModa-Italic.ttf", import.meta.url)),
+const [dmSerif, dmSerifItalic, hanken] = await Promise.all([
+  readFile(new URL("../../../../assets/fonts/DMSerifDisplay-Regular.ttf", import.meta.url)),
+  readFile(new URL("../../../../assets/fonts/DMSerifDisplay-Italic.ttf", import.meta.url)),
   readFile(new URL("../../../../assets/fonts/HankenGrotesk-500.ttf", import.meta.url)),
 ]);
 
@@ -54,15 +54,15 @@ export async function GET(req: Request) {
               ))}
             </svg>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ fontFamily: "Bodoni", fontSize: 34, letterSpacing: 9 }}>SUTON</div>
+              <div style={{ fontFamily: "DMSerif", fontSize: 34, letterSpacing: 9 }}>SUTON</div>
               <div style={{ fontSize: 13, letterSpacing: 5, color: "#b5a893" }}>{sr ? "KUHINJA & VINO" : "KITCHEN & WINE"}</div>
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
             <div style={{ display: "flex", fontSize: 20, letterSpacing: 5, color: "#e3a857", textTransform: "uppercase" }}>{eyebrow}</div>
-            <div style={{ display: "flex", fontFamily: "Bodoni", fontSize: size, lineHeight: 1.02, letterSpacing: -1.5 }}>{title}</div>
+            <div style={{ display: "flex", fontFamily: "DMSerif", fontSize: size, lineHeight: 1.02, letterSpacing: -1.5 }}>{title}</div>
           </div>
-          <div style={{ display: "flex", fontFamily: "BodoniItalic", fontSize: 30, color: "#e3a857" }}>{sr ? "Vatra. Vino. Reka." : "Fire. Wine. River."}</div>
+          <div style={{ display: "flex", fontFamily: "DMSerifItalic", fontSize: 30, color: "#e3a857" }}>{sr ? "Vatra. Vino. Reka." : "Fire. Wine. River."}</div>
         </div>
         <div style={{ display: "flex", flex: 1, alignItems: "flex-end", justifyContent: "center", paddingBottom: 0 }}>
           <div
@@ -88,8 +88,8 @@ export async function GET(req: Request) {
       width: 1200,
       height: 630,
       fonts: [
-        { name: "Bodoni", data: bodoni, weight: 400, style: "normal" },
-        { name: "BodoniItalic", data: bodoniItalic, weight: 400, style: "italic" },
+        { name: "DMSerif", data: dmSerif, weight: 400, style: "normal" },
+        { name: "DMSerifItalic", data: dmSerifItalic, weight: 400, style: "italic" },
         { name: "Hanken", data: hanken, weight: 500, style: "normal" },
       ],
       headers: { "Cache-Control": "public, max-age=31536000, immutable" },
