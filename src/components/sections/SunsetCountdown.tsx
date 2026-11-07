@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatBelgradeTime, sunsetFor } from "@/lib/time";
+import { phoneIdle } from "@/lib/motion";
 import type { Locale } from "@/lib/i18n";
 
 type State = { time: string; mins: number; tomorrow: string } | null;
@@ -17,9 +18,12 @@ export function SunsetCountdown({ locale }: { locale: Locale }) {
       const tomorrow = sunsetFor(new Date(now.getTime() + 86400000));
       setS({ time: formatBelgradeTime(today), mins: Math.round((today.getTime() - now.getTime()) / 60000), tomorrow: formatBelgradeTime(tomorrow) });
     };
-    update();
+    const cancel = phoneIdle(update);
     const id = window.setInterval(update, 30_000);
-    return () => window.clearInterval(id);
+    return () => {
+      cancel();
+      window.clearInterval(id);
+    };
   }, []);
 
   const sr = locale === "sr";

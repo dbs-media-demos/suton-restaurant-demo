@@ -41,7 +41,7 @@ export function GalleryRibbon({ rows, title, href, linkLabel, viewLabel }: { row
   );
 
   return (
-    <section ref={root} className="relative overflow-hidden py-[clamp(5rem,10vw,9rem)] phone:order-3 phone:pb-6 phone:pt-5" aria-labelledby="ribbon-title">
+    <section ref={root} className="relative overflow-hidden py-[clamp(5rem,10vw,9rem)] phone-soon [--later-h:236px] [--soon:80ms] phone:order-3 phone:pb-6 phone:pt-5" aria-labelledby="ribbon-title">
       <div className="wrap mb-12 flex items-end justify-between gap-6 phone:mb-3">
         <h2 id="ribbon-title" className="t-h2 max-w-[14ch]">
           {title}

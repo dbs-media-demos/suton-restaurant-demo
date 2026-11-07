@@ -13,7 +13,7 @@ export function PhoneVisit({ locale, dict }: { locale: Locale; dict: Dict }) {
   const city = locale === "sr" ? site.city : site.cityEn;
   const directions = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${site.neighbourhood}, ${city}`)}`;
   return (
-    <section className="wrap hidden pb-2 pt-6 phone:order-2 phone:block" aria-labelledby="visit-title">
+    <section className="phone-soon [--later-h:263px] [--soon:40ms] wrap hidden pb-2 pt-6 phone:order-2 phone:block" aria-labelledby="visit-title">
       <p className="t-eyebrow text-candle">{c.eyebrow}</p>
       <h2 id="visit-title" className="t-h2 mt-2.5">
         {c.title}

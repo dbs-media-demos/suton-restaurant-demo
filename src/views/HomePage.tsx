@@ -227,7 +227,7 @@ export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
   return (
     <PageShell>
       {/* Phones reorder these for a guest deciding where to eat (CSS order); desktop keeps the page's order. */}
-      <div className="phone:flex phone:flex-col">
+      <div className="phone-home phone:flex phone:flex-col">
       <Hero
         dict={dict}
         h1={c.h1}

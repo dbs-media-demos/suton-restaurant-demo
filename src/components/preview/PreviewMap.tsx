@@ -8,7 +8,7 @@ export function PreviewMap({ biz, dict }: { biz: Biz; dict: Dict }) {
   const embed = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
   return (
-    <section className="theme-night py-24 md:py-36 phone:order-2 phone:py-7" aria-labelledby="visit-title">
+    <section className="phone-soon [--later-h:560px] [--soon:40ms] theme-night py-24 md:py-36 phone:order-2 phone:py-7" aria-labelledby="visit-title">
       <div className="wrap grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center phone:grid-cols-1">
         <div>
           <p className="t-eyebrow text-candle">Gde smo</p>

@@ -30,7 +30,7 @@ export function EventsStack({ locale, eyebrow, title, more, moreHref, cta }: { l
   );
 
   return (
-    <section ref={root} className="relative py-[clamp(6rem,12vw,11rem)] phone:order-[11] phone:py-8" aria-labelledby="events-title">
+    <section ref={root} className="relative py-[clamp(6rem,12vw,11rem)] phone-later [--later-h:691px] phone:order-[11] phone:py-8" aria-labelledby="events-title">
       <div className="wrap mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between phone:mb-4 phone:flex-col phone:items-start phone:gap-2">
         <div>
           <p className="t-eyebrow text-candle">{eyebrow}</p>

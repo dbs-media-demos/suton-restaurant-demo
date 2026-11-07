@@ -550,6 +550,22 @@ em.t-serif,
     }
   }
 
+  /* Home, first load: everything past the Reserve anchor skips style and layout until it nears the
+     screen, so the first frame only lays out what's about to be seen. --later-h is each section's
+     content height at 375 px, which keeps the page's length right until the real size is known. */
+  .phone-home .phone-soon,
+  .phone-home .phone-later,
+  main:has(> .phone-home) ~ footer {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto var(--later-h, 954px);
+  }
+  /* The rest of the next two screens comes a frame at a time (--soon), so none of it adds to a long task. Not on a tablet, where it can be on screen. */
+  @media (max-width: 767.98px) {
+    .phone-home .phone-soon {
+      animation: phone-soon var(--soon, 1ms) step-end;
+    }
+  }
+
   /* The fire, still: a few sparks drift up from the grill. Compositor only. */
   .embers i {
     position: absolute;
@@ -653,6 +669,9 @@ em.t-serif,
     max-width: 48rem;
     margin-inline: auto;
   }
+}
+@keyframes phone-soon {
+  from, to { content-visibility: hidden; }
 }
 @keyframes ember {
   0% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }

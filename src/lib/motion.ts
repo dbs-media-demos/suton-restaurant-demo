@@ -18,6 +18,23 @@ export const prefersReducedMotion = () =>
 
 export const isTouch = () => typeof window !== "undefined" && window.matchMedia("(hover: none), (pointer: coarse)").matches;
 
+/**
+ * On a phone, runs `fn` in an idle task of its own instead of during hydration (a clock's first
+ * Intl.DateTimeFormat costs 50 ms on a slow one). On desktop it just runs. Returns a cancel.
+ */
+export function phoneIdle(fn: () => void) {
+  if (!isPhone()) {
+    fn();
+    return () => {};
+  }
+  if (!window.requestIdleCallback) {
+    const id = window.setTimeout(fn, 200);
+    return () => window.clearTimeout(id);
+  }
+  const id = window.requestIdleCallback(fn, { timeout: 1500 });
+  return () => window.cancelIdleCallback(id);
+}
+
 /** Element starts below the fold — safe to hide it for an entrance animation. */
 export const belowFold = (el: Element) => el.getBoundingClientRect().top > window.innerHeight * 0.92;
 

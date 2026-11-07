@@ -255,5 +255,9 @@ export const menu: MenuSection[] = [
 export const allDishes = menu.flatMap((s) => s.dishes);
 export const signatureDishes = allDishes.filter((d) => d.signature);
 
+/** Whole dinars by hand: the first toLocaleString starts Intl, which froze hydration for 50 ms on a slow phone. */
+const grouped = (n: number, tag: string, sep: string) =>
+  Number.isInteger(n) ? String(n).replace(/\B(?=(\d{3})+$)/g, sep) : n.toLocaleString(tag);
+
 export const formatRsd = (n: number, locale: "sr" | "en") =>
-  locale === "sr" ? `${n.toLocaleString("de-DE")} RSD` : `RSD ${n.toLocaleString("en-US")}`;
+  locale === "sr" ? `${grouped(n, "de-DE", ".")} RSD` : `RSD ${grouped(n, "en-US", ",")}`;

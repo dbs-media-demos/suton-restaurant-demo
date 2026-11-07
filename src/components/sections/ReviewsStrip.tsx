@@ -17,7 +17,7 @@ export function ReviewsStrip({ locale, dict, eyebrow, title, href, linkLabel, bi
   // Phones read the shortest three first, so all three fit on one screen
   const byLength = [...list].sort((a, b) => a.text[locale].length - b.text[locale].length);
   return (
-    <section className="relative overflow-hidden py-[clamp(6rem,12vw,11rem)] phone:order-5 phone:pb-6 phone:pt-6" aria-labelledby="reviews-title">
+    <section className="relative overflow-hidden py-[clamp(6rem,12vw,11rem)] phone-later [--later-h:1048px] phone:order-5 phone:pb-6 phone:pt-6" aria-labelledby="reviews-title">
       <div className="wrap grid gap-10 md:grid-cols-[1fr_auto] md:items-end phone:grid-cols-1 phone:gap-2">
         <div>
           <p className="t-eyebrow text-candle">{eyebrow}</p>

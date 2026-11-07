@@ -8,7 +8,7 @@ import type { Locale } from "@/lib/i18n";
 /** The wine section: a tall arch with the pour, and the four regions. */
 export function WineTeaser({ locale, eyebrow, title, text, cta, href }: { locale: Locale; eyebrow: string; title: string; text: string; cta: string; href: string }) {
   return (
-    <section className="relative py-[clamp(6rem,12vw,11rem)] phone:order-[9] phone:py-8" aria-labelledby="wine-title">
+    <section className="relative py-[clamp(6rem,12vw,11rem)] phone-later [--later-h:821px] phone:order-[9] phone:py-8" aria-labelledby="wine-title">
       <div className="wrap grid items-center gap-16 md:grid-cols-2 lg:grid-cols-[1fr_1.1fr] phone:flex phone:flex-col phone:items-stretch phone:gap-5">
         <div className="relative mx-auto w-full max-w-[30rem] phone:max-w-none">
           <Parallax className="arch aspect-[3/4.6] bg-char phone:aspect-[5/3]" amount={8} revealFrom="inset(40% 0% 0% 0%)">

@@ -27,7 +27,7 @@ export function RiverSunset({
   alt: string;
 }) {
   return (
-    <section className="relative min-h-[100svh] overflow-hidden phone:order-10 phone:min-h-0" aria-labelledby="river-title">
+    <section className="relative min-h-[100svh] overflow-hidden phone-later [--later-h:500px] phone:order-10 phone:min-h-0" aria-labelledby="river-title">
       <div className="absolute inset-0">
         <Photo k="river/bridge-night" alt={alt} sizes="100vw" quality={75} />
         <RiverWater src={P.src} aspect={P.w / P.h} waterline={0.52} />

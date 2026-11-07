@@ -7,6 +7,7 @@ import { fmtTime } from "@/lib/site";
 import type { Dict } from "@/i18n/dict";
 import { useBiz } from "@/components/preview/BizContext";
 import { openStatus as bizOpenStatus } from "@/lib/biz-core";
+import { phoneIdle } from "@/lib/motion";
 
 /**
  * Live "Open now · closes at 00:00" badge in Belgrade time.
@@ -19,9 +20,12 @@ export function OpenBadge({ dict, className, detail = true, kitchen = true }: { 
 
   useEffect(() => {
     const update = () => (biz.preview ? setPreviewStatus(bizOpenStatus(biz)) : setStatus(openStatus()));
-    update();
+    const cancel = phoneIdle(update);
     const id = window.setInterval(update, 30_000);
-    return () => window.clearInterval(id);
+    return () => {
+      cancel();
+      window.clearInterval(id);
+    };
   }, [biz]);
 
   if (biz.preview) {

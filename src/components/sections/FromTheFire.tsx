@@ -74,7 +74,7 @@ export function FromTheFire({ locale, eyebrow, title, intro, chapters, alts, lin
   );
 
   return (
-    <section ref={root} className="relative overflow-hidden bg-night md:h-[100svh] phone:order-[8] phone:h-auto phone:py-8" aria-labelledby="fire-title">
+    <section ref={root} className="relative overflow-hidden bg-night md:h-[100svh] phone-later [--later-h:526px] phone:order-[8] phone:h-auto phone:py-8" aria-labelledby="fire-title">
       <div className="wrap hidden phone:block">
         <p className="t-eyebrow text-candle">{eyebrow}</p>
         <h2 className="t-h2 mt-3">{title}</h2>

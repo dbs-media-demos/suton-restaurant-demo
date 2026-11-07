@@ -25,7 +25,7 @@ export function MenuPreview({ locale, eyebrow, title, text, cta, href }: { local
             </div>
           </Reveal>
         </div>
-        <Reveal className="phone:mt-3">
+        <Reveal className="phone-soon [--later-h:533px] phone:mt-3">
           <DishRows dishes={signatureDishes} locale={locale} theme="paper" />
           <div className="mt-3 hidden phone:block">
             <Button href={href} variant="ink" className="h-11 w-full justify-center">

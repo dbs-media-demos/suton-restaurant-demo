@@ -11,7 +11,7 @@ import type { Biz } from "@/lib/biz-core";
 /** Closing call to action over candlelight. Used at the end of most pages. */
 export function CtaBand({ dict, reserveHref, biz, locale }: { dict: Dict; reserveHref: string; biz?: Biz; locale?: Locale }) {
   return (
-    <section className="relative overflow-hidden phone:order-4" aria-labelledby="cta-title">
+    <section className="relative overflow-hidden phone-soon [--later-h:377px] [--soon:120ms] phone:order-4" aria-labelledby="cta-title">
       <div className="absolute inset-0">
         <VideoLoop name="candles" poster="poster/candles" sizes="100vw" />
         <div className="absolute inset-0 bg-[radial-gradient(90%_70%_at_50%_60%,rgb(14_12_10/0.35),rgb(14_12_10/0.92))]" />

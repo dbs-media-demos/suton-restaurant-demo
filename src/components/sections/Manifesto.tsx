@@ -13,7 +13,7 @@ const Pill = ({ k, video }: { k: PhotoKey; video?: boolean }) => (
 export function Manifesto({ eyebrow, text, pills, footnotes }: { eyebrow: string; text: string; pills: Record<number, PhotoKey>; footnotes: { n: string; label: string }[] }) {
   const inserts = Object.fromEntries(Object.entries(pills).map(([i, k]) => [Number(i), <Pill key={i} k={k} video={k.startsWith("fire")} />]));
   return (
-    <section className="relative py-[clamp(7rem,16vw,14rem)] phone:order-[7] phone:pb-8 phone:pt-2">
+    <section className="relative py-[clamp(7rem,16vw,14rem)] phone-later [--later-h:430px] phone:order-[7] phone:pb-8 phone:pt-2">
       <div className="wrap">
         <p className="t-eyebrow text-candle">{eyebrow}</p>
         <ScrubWords
