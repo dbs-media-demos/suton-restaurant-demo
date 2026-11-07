@@ -12,19 +12,19 @@ const exploreKeys: PageKey[] = ["menu", "wine", "reservations", "story", "produc
 
 export function Footer({ locale, dict, biz }: { locale: Locale; dict: Dict; biz?: Biz }) {
   return (
-    <footer className="theme-night relative border-t border-line pb-28 md:pb-6">
-      <div className="wrap grid gap-14 pt-20 md:grid-cols-12 md:gap-8">
+    <footer className="theme-night relative border-t border-line pb-28 md:pb-6 phone:pb-4">
+      <div className="wrap grid gap-14 pt-20 md:grid-cols-12 md:gap-8 phone:grid-cols-1 phone:gap-7 phone:pt-8">
         <div className="md:col-span-5">
           <p className="t-eyebrow text-candle">{dict.footer.news}</p>
-          <p className="t-h3 mt-5 max-w-md">{dict.footer.newsText}</p>
-          <div className="mt-8 max-w-md">
+          <p className="t-h3 mt-5 max-w-md phone:mt-2.5 phone:text-[1.2rem]!">{dict.footer.newsText}</p>
+          <div className="mt-8 max-w-md phone:mt-3">
             <Newsletter dict={dict} />
           </div>
         </div>
 
         <nav aria-label={dict.footer.explore} className="md:col-span-3 md:col-start-7">
           <p className="t-eyebrow text-smoke">{dict.footer.explore}</p>
-          <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2.5 md:grid-cols-1">
+          <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2.5 md:grid-cols-1 phone:mt-3 phone:grid-cols-2 phone:gap-y-1">
             {exploreKeys.map((k) => (
               <li key={k}>
                 <Link href={pageHref(locale, k)} className="link-underline text-cream/85 hover:text-cream">
@@ -37,7 +37,7 @@ export function Footer({ locale, dict, biz }: { locale: Locale; dict: Dict; biz?
 
         <div className="md:col-span-3">
           <p className="t-eyebrow text-smoke">{dict.footer.visit}</p>
-          <address className="mt-5 not-italic leading-relaxed text-cream/85">
+          <address className="mt-5 not-italic leading-relaxed text-cream/85 phone:mt-3">
             {biz ? (
               biz.address.full
             ) : (

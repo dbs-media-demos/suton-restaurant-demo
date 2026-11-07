@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import clsx from "clsx";
-import { gsap, isTouch, prefersReducedMotion } from "@/lib/gsap";
+import { isTouch, loadKit, prefersReducedMotion, useDesktopModule } from "@/lib/motion";
 import { Mark } from "@/components/brand/Logo";
 import { formatRsd } from "@/content/menu";
 import type { Locale } from "@/lib/i18n";
@@ -88,9 +88,12 @@ export function GiftCardBuilder({ locale }: { locale: Locale }) {
 
   const value = exp ? t.exp[exp].p : amount ?? (Number(custom) || 0);
 
+  const kit = useDesktopModule(loadKit);
+
   const tilt = (ev: React.PointerEvent) => {
     const el = card.current;
-    if (!el || isTouch() || prefersReducedMotion()) return;
+    const gsap = kit.current?.gsap;
+    if (!el || !gsap || isTouch() || prefersReducedMotion()) return;
     const r = el.getBoundingClientRect();
     const x = (ev.clientX - r.left) / r.width - 0.5;
     const y = (ev.clientY - r.top) / r.height - 0.5;
@@ -98,7 +101,7 @@ export function GiftCardBuilder({ locale }: { locale: Locale }) {
     el.style.setProperty("--gx", `${(x + 0.5) * 100}%`);
     el.style.setProperty("--gy", `${(y + 0.5) * 100}%`);
   };
-  const untilt = () => card.current && gsap.to(card.current, { rotateX: 0, rotateY: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
+  const untilt = () => card.current && kit.current?.gsap.to(card.current, { rotateX: 0, rotateY: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
 
   const submit = (ev: React.FormEvent) => {
     ev.preventDefault();

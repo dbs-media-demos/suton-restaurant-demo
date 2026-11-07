@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useClientValue } from "@/lib/hooks";
 import clsx from "clsx";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { loadKit, prefersReducedMotion, useDesktopModule } from "@/lib/motion";
 import type { Locale } from "@/lib/i18n";
 import { site } from "@/lib/site";
 import { FloorPlan, type Area } from "./FloorPlan";
@@ -126,14 +126,19 @@ export function ReservationWidget({ locale, eventsHref }: { locale: Locale; even
   const t = T[locale];
   const [step, setStep] = useState(0);
   const [picked, setDate] = useState<string | null>(null);
-  const [time, setTime] = useState<string | null>(null);
-  const [guests, setGuests] = useState(2);
+  const [timePicked, setTime] = useState<string | null | undefined>(undefined);
+  const [guestsPicked, setGuests] = useState<number | null>(null);
   const [area, setArea] = useState<Area | null>(null);
   const [form, setForm] = useState({ name: "", phone: "", email: "", occasion: 0, notes: "", consent: false });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
   const [code, setCode] = useState("");
   const panel = useRef<HTMLDivElement>(null);
+  const kit = useDesktopModule(loadKit);
+  // Arriving from the home page's table picker: ?guests=4&time=20:00
+  const search = useClientValue(() => window.location.search);
+  const asked = useMemo(() => new URLSearchParams(search ?? ""), [search]);
+  const guests = guestsPicked ?? Math.min(12, Math.max(1, Number(asked.get("guests")) || 2));
   const heading = useRef<HTMLHeadingElement>(null);
 
   // The date list only exists in the browser (avoids a server/client date mismatch).
@@ -157,6 +162,9 @@ export function ReservationWidget({ locale, eventsHref }: { locale: Locale; even
     });
   }, [dateObj, date]);
 
+  const askedTime = asked.get("time");
+  const time = timePicked !== undefined ? timePicked : slots.some((s) => s.s === askedTime && !s.past && !s.full) ? askedTime : null;
+
   const terraceOpen = useMemo(() => {
     if (!dateObj) return true;
     const md = (dateObj.getMonth() + 1) * 100 + dateObj.getDate();
@@ -173,7 +181,13 @@ export function ReservationWidget({ locale, eventsHref }: { locale: Locale; even
       setStep(n);
       requestAnimationFrame(() => heading.current?.focus());
     };
-    if (!el || prefersReducedMotion()) return change();
+    const gsap = kit.current?.gsap;
+    if (!el || !gsap || prefersReducedMotion()) {
+      change();
+      const top = el?.closest("section")?.getBoundingClientRect().top ?? 0;
+      if (el && gsap === undefined && top < 0) window.scrollBy({ top: top - 80 });
+      return;
+    }
     gsap.to(el, {
       opacity: 0,
       y: -16,
@@ -357,13 +371,13 @@ export function ReservationWidget({ locale, eventsHref }: { locale: Locale; even
               <fieldset className="mt-8">
                 <legend className="t-eyebrow text-smoke">{t.guests}</legend>
                 <div className="mt-3 flex items-center gap-4">
-                  <button type="button" onClick={() => setGuests((g) => Math.max(1, g - 1))} className="grid h-12 w-12 place-items-center rounded-full border border-line text-xl hover:border-cream" aria-label="−">
+                  <button type="button" onClick={() => setGuests(Math.max(1, guests - 1))} className="grid h-12 w-12 place-items-center rounded-full border border-line text-xl hover:border-cream" aria-label="−">
                     −
                   </button>
                   <output className="t-serif t-num w-24 text-center text-4xl" aria-live="polite">
                     {guests}
                   </output>
-                  <button type="button" onClick={() => setGuests((g) => Math.min(12, g + 1))} className="grid h-12 w-12 place-items-center rounded-full border border-line text-xl hover:border-cream" aria-label="+">
+                  <button type="button" onClick={() => setGuests(Math.min(12, guests + 1))} className="grid h-12 w-12 place-items-center rounded-full border border-line text-xl hover:border-cream" aria-label="+">
                     +
                   </button>
                   <span className="text-smoke">{t.people(guests).replace(/^\d+ /, "")}</span>

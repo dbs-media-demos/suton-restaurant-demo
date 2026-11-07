@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { gsap, useGSAP, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { useDesktopGSAP, prefersReducedMotion } from "@/lib/motion";
 import { Photo } from "@/components/ui/Photo";
 import type { PhotoKey } from "@/content/photos";
 
@@ -14,8 +14,8 @@ import type { PhotoKey } from "@/content/photos";
 export function GalleryRibbon({ rows, title, href, linkLabel, viewLabel }: { rows: { k: PhotoKey; alt: string }[][]; title: string; href: string; linkLabel: string; viewLabel: string }) {
   const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap, ScrollTrigger }) => {
       if (prefersReducedMotion()) return;
       const tracks = gsap.utils.toArray<HTMLElement>("[data-row]", root.current);
       const tweens = tracks.map((t, i) =>
@@ -41,8 +41,8 @@ export function GalleryRibbon({ rows, title, href, linkLabel, viewLabel }: { row
   );
 
   return (
-    <section ref={root} className="relative overflow-hidden py-[clamp(5rem,10vw,9rem)]" aria-labelledby="ribbon-title">
-      <div className="wrap mb-12 flex items-end justify-between gap-6">
+    <section ref={root} className="relative overflow-hidden py-[clamp(5rem,10vw,9rem)] phone:order-3 phone:pb-6 phone:pt-5" aria-labelledby="ribbon-title">
+      <div className="wrap mb-12 flex items-end justify-between gap-6 phone:mb-3">
         <h2 id="ribbon-title" className="t-h2 max-w-[14ch]">
           {title}
         </h2>
@@ -50,9 +50,9 @@ export function GalleryRibbon({ rows, title, href, linkLabel, viewLabel }: { row
           {linkLabel} →
         </Link>
       </div>
-      <div className="flex flex-col gap-4 md:gap-6">
+      <div className="ribbon-rows flex flex-col gap-4 md:gap-6">
         {rows.map((row, i) => (
-          <div key={i} data-row className="flex w-max gap-4 will-change-transform md:gap-6">
+          <div key={i} data-row className="ribbon-row flex w-max gap-4 will-change-transform md:gap-6">
             {[0, 1].map((copy) =>
               row.map((p, j) => (
                 <Link
@@ -62,11 +62,12 @@ export function GalleryRibbon({ rows, title, href, linkLabel, viewLabel }: { row
                   aria-hidden={copy === 1 || undefined}
                   data-cursor={viewLabel}
                   className={clsx(
-                    "group relative block shrink-0 overflow-hidden bg-char",
+                    "ribbon-photo group relative block shrink-0 overflow-hidden bg-char",
+                    copy === 1 && "phone:hidden",
                     j % 3 === 0 ? "arch aspect-[3/4] w-[46vw] md:w-[19vw]" : j % 3 === 1 ? "aspect-[4/3] w-[62vw] rounded-2xl md:w-[27vw]" : "aspect-square w-[44vw] rounded-full md:w-[18vw]",
                   )}
                 >
-                  <Photo k={p.k} alt={copy === 1 ? "" : p.alt} sizes="(min-width: 768px) 27vw, 62vw" quality={60} className="transition-transform duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-110" />
+                  <Photo k={p.k} alt={copy === 1 ? "" : p.alt} sizes="(hover: none) min(66vw, 18rem), (pointer: coarse) min(66vw, 18rem), (min-width: 768px) 27vw, min(66vw, 18rem)" quality={60} className="transition-transform duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-110" />
                 </Link>
               )),
             )}

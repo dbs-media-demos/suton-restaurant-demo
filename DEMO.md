@@ -37,4 +37,8 @@ handoff/desktop-home.png, handoff/desktop-feature.png, handoff/mobile-home.png, 
 - Fonts: DM Serif Display replaced Bodoni Moda on 2026-10-07 because Bodoni's hairlines were too thin and nearly vanished. Subset: Basic Latin, Latin-1, Serbian Latin (č ć š ž đ) and typographic punctuation, kern/liga kept (~18 KB per woff2). The OG route (`/api/og`) uses TTF subsets of the same font from `assets/fonts/`.
 - The business, people, farms, wineries, reviews and awards are fictional. Photos: Unsplash; videos: Pexels (see `public/images/SOURCES.md`).
 - Forms validate and show success states but send nothing.
-- On phones the hero film starts on the first touch/scroll (or after 6 s) so the first paint stays light; desktop starts it after load.
+- Phone mode is below 768 px or any touch screen (`phone:` variant in globals.css, `isPhone` in lib/motion.ts). Desktop at 1024 px and up is unchanged.
+  - First screen: a sharp still from the hero film (scripts/gen-hero-still.mjs), service + town, stars + Google, open now, the week's hours, Call with the number; the next section peeks over the Menu + Reserve bar (a preview's bar: Menu + Call).
+  - Order (CSS order, desktop's stays): menu as text, hours and location, photos, reservation, reviews, story, fire, wine, river, events. Three full reviews inside the first four screens, the other three one swipe away.
+  - No film, pinning, scrubbing, parallax, WebGL or Lenis: GSAP and Lenis aren't even downloaded (lib/motion.ts). Motion left: tap feedback, one rise per section, swipe rows, the table picker (guests + time, carried into /rezervacije), and sparks drifting off the fire still.
+  - Fonts: the two DM Serif files, plus the system UI face instead of Hanken Grotesk. The concept badge sits at the end of the page. Previews no longer hide until hydration.

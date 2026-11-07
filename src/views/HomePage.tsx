@@ -10,6 +10,8 @@ import { ReviewsStrip } from "@/components/sections/ReviewsStrip";
 import { EventsStack } from "@/components/sections/EventsStack";
 import { GalleryRibbon } from "@/components/sections/GalleryRibbon";
 import { CtaBand } from "@/components/sections/CtaBand";
+import { PhoneStory } from "@/components/sections/PhoneStory";
+import { PhoneVisit } from "@/components/sections/PhoneVisit";
 import { chapters, chapterAlts } from "@/content/story";
 import { getDictionary } from "@/i18n/dict";
 import type { Locale } from "@/lib/i18n";
@@ -17,7 +19,8 @@ import { pageHref, pagePaths } from "@/lib/routes";
 import { buildMetadata } from "@/lib/seo";
 import type { PhotoKey } from "@/content/photos";
 import { PreviewMap } from "@/components/preview/PreviewMap";
-import { num, openDays, type Biz } from "@/lib/biz-core";
+import { hoursGroups, num, openDays, type Biz } from "@/lib/biz-core";
+import { fmtTime, hoursRows, site } from "@/lib/site";
 
 const copy = {
   sr: {
@@ -25,6 +28,7 @@ const copy = {
     description:
       "Moderna balkanska kuhinja sa otvorene vatre, 180 srpskih vina i terasa na Savi za najlepši zalazak u gradu. Savamala, Beograd. Rezervišite sto online.",
     h1: "Suton, restoran i vinski bar na obali Save u Savamali, Beograd",
+    phoneH1: "Restoran i vinski bar u Savamali, Beograd",
     eyebrow: "Savamala · Beograd · od 2019.",
     sub: "Moderna balkanska kuhinja sa otvorene vatre, srpska vina i sto na obali Save.",
     story: {
@@ -97,6 +101,7 @@ const copy = {
     description:
       "Modern Balkan cooking over open fire, 180 Serbian wines and a river terrace with the best sunset in Belgrade. Savamala. Book a table online.",
     h1: "Suton, a restaurant and wine bar on the Sava riverfront in Savamala, Belgrade",
+    phoneH1: "Restaurant & wine bar in Savamala, Belgrade",
     eyebrow: "Savamala · Belgrade · since 2019",
     sub: "Modern Balkan cooking over open fire, Serbian wines and a table on the Sava.",
     story: {
@@ -184,6 +189,7 @@ function previewCopy(biz: Biz) {
   return {
     ...c,
     h1: `${biz.name}, restoran — ${biz.area}`,
+    phoneH1: `Restoran, ${biz.area}`,
     eyebrow: biz.area,
     sub: "Domaća kuhinja, dobra vina i sto koji vas čeka.",
     story: { ...c.story, aside: `VATRA · VINO · DRUŠTVO · ${biz.area.toUpperCase()} · ` },
@@ -215,9 +221,13 @@ export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
   const c = biz ? previewCopy(biz) : copy[locale];
   const dict = getDictionary(locale);
   const reserve = pageHref(locale, "reservations");
+  const fmt = (n: number) => n.toLocaleString(locale === "sr" ? "de-DE" : "en-US");
+  const rating = biz ? biz.rating : site.rating;
 
   return (
     <PageShell>
+      {/* Phones reorder these for a guest deciding where to eat (CSS order); desktop keeps the page's order. */}
+      <div className="phone:flex phone:flex-col">
       <Hero
         dict={dict}
         h1={c.h1}
@@ -228,7 +238,15 @@ export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
         story={{ ...c.story, href: pageHref(locale, "story") }}
         word={biz ? biz.shortName.toUpperCase() : undefined}
         tagline={biz ? (biz.tagline ?? "Hrana. Vino. Društvo.") : undefined}
+        phone={{
+          h1: c.phoneH1,
+          tel: biz ? biz.phone : site.phone,
+          telDisplay: biz ? biz.phoneDisplay : site.phoneDisplay,
+          rating: rating && { value: rating.value.toLocaleString(locale === "sr" ? "de-DE" : "en-US"), count: fmt(rating.count) },
+          hours: biz ? hoursGroups(biz) : hoursRows.map((r) => `${r.days[locale]} ${fmtTime(r.open)}–${fmtTime(r.close)}`),
+        }}
       />
+      <PhoneStory eyebrow={c.eyebrow} tagline={biz ? (biz.tagline ?? "Hrana. Vino. Društvo.") : dict.tagline} sub={c.sub} story={{ ...c.story, href: pageHref(locale, "story") }} />
       <Manifesto eyebrow={c.manifesto.eyebrow} text={c.manifesto.text} pills={c.manifesto.pills} footnotes={c.manifesto.footnotes} />
       <FromTheFire
         locale={locale}
@@ -245,8 +263,9 @@ export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
       <ReviewsStrip locale={locale} dict={dict} eyebrow={c.reviews.eyebrow} title={c.reviews.title} href={pageHref(locale, "reviews")} linkLabel={c.reviews.link} biz={biz} />
       {!biz && <EventsStack locale={locale} {...c.events} moreHref={pageHref(locale, "events")} />}
       <GalleryRibbon rows={c.ribbon} title={c.gallery.title} href={pageHref(locale, "gallery")} linkLabel={c.gallery.link} viewLabel={dict.cursor.view} />
-      {biz && <PreviewMap biz={biz} dict={dict} />}
-      <CtaBand dict={dict} reserveHref={reserve} biz={biz} />
+      {biz ? <PreviewMap biz={biz} dict={dict} /> : <PhoneVisit locale={locale} dict={dict} />}
+      <CtaBand dict={dict} reserveHref={reserve} biz={biz} locale={locale} />
+      </div>
     </PageShell>
   );
 }

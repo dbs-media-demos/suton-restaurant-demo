@@ -2,7 +2,7 @@
 
 import { useRef, type CSSProperties, type ElementType, type ReactNode } from "react";
 import clsx from "clsx";
-import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion, belowFold } from "@/lib/gsap";
+import { useDesktopGSAP, prefersReducedMotion, belowFold } from "@/lib/motion";
 
 type Split = { revert: () => void };
 
@@ -30,8 +30,8 @@ type SplitProps = {
 export function SplitReveal({ children, as: Tag = "h2", className, delay = 0, immediate, stagger, id, words }: SplitProps) {
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap }) => {
       const el = ref.current;
       if (!el || immediate || prefersReducedMotion() || !belowFold(el)) return;
       gsap.set(el, { opacity: 0 });
@@ -97,8 +97,8 @@ type RevealProps = {
 export function Reveal({ children, as: Tag = "div", className, delay = 0, y = 40, stagger, immediate, id }: RevealProps) {
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap, ScrollTrigger }) => {
       const el = ref.current;
       if (!el || immediate || prefersReducedMotion() || !belowFold(el)) return;
       const targets = stagger ? Array.from(el.children) : [el];
@@ -138,8 +138,8 @@ export function ScrubWords({
 }) {
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap }) => {
       const el = ref.current;
       if (!el || prefersReducedMotion()) return;
       const words = el.querySelectorAll<HTMLElement>("[data-w]");
@@ -183,8 +183,8 @@ export function Parallax({
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap }) => {
       const el = ref.current;
       const inner = el?.firstElementChild as HTMLElement | null;
       if (!el || !inner || prefersReducedMotion()) return;

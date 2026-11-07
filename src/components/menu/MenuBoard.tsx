@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react";
 import clsx from "clsx";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { Flip } from "@/lib/flip";
+import { loadFlip, prefersReducedMotion, useDesktopModule } from "@/lib/motion";
 import { menu, dietLabels, dietShort, type Diet } from "@/content/menu";
 import type { Locale } from "@/lib/i18n";
 import { DishRows } from "./DishRows";
@@ -18,18 +17,21 @@ export function MenuBoard({ locale, labels }: { locale: Locale; labels: { filter
   const [active, setActive] = useState<Diet[]>([]);
   const board = useRef<HTMLDivElement>(null);
 
+  const flip = useDesktopModule(loadFlip);
+
   const toggle = (d: Diet) => {
     const el = board.current;
-    const state = el && !prefersReducedMotion() ? Flip.getState(el.querySelectorAll("[data-dish], [data-section]")) : null;
+    const kit = flip.current;
+    const state = el && kit && !prefersReducedMotion() ? kit.Flip.getState(el.querySelectorAll("[data-dish], [data-section]")) : null;
     setActive((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d]));
-    if (state) {
+    if (state && kit) {
       requestAnimationFrame(() =>
-        Flip.from(state, {
+        kit.Flip.from(state, {
           duration: 0.8,
           ease: "expo.out",
           absolute: false,
-          onEnter: (els) => gsap.fromTo(els, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.03 }),
-          onLeave: (els) => gsap.to(els, { opacity: 0, duration: 0.3 }),
+          onEnter: (els) => kit.gsap.fromTo(els, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.03 }),
+          onLeave: (els) => kit.gsap.to(els, { opacity: 0, duration: 0.3 }),
         }),
       );
     }

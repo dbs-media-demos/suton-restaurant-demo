@@ -5,7 +5,7 @@ import type { PhotoKey } from "@/content/photos";
 const Pill = ({ k, video }: { k: PhotoKey; video?: boolean }) => (
   <span className="relative mx-[0.12em] inline-block h-[0.78em] w-[1.9em] translate-y-[0.08em] overflow-hidden rounded-full align-baseline" aria-hidden>
     <Photo k={k} alt="" sizes="160px" quality={60} />
-    {video && <span className="flicker absolute inset-0 bg-candle/20 mix-blend-overlay" />}
+    {video && <span className="flicker absolute inset-0 bg-candle/20 mix-blend-overlay phone:hidden" />}
   </span>
 );
 
@@ -13,19 +13,19 @@ const Pill = ({ k, video }: { k: PhotoKey; video?: boolean }) => (
 export function Manifesto({ eyebrow, text, pills, footnotes }: { eyebrow: string; text: string; pills: Record<number, PhotoKey>; footnotes: { n: string; label: string }[] }) {
   const inserts = Object.fromEntries(Object.entries(pills).map(([i, k]) => [Number(i), <Pill key={i} k={k} video={k.startsWith("fire")} />]));
   return (
-    <section className="relative py-[clamp(7rem,16vw,14rem)]">
+    <section className="relative py-[clamp(7rem,16vw,14rem)] phone:order-[7] phone:pb-8 phone:pt-2">
       <div className="wrap">
         <p className="t-eyebrow text-candle">{eyebrow}</p>
         <ScrubWords
           text={text}
           inserts={inserts}
-          className="t-serif mt-8 max-w-[22ch] text-[clamp(2rem,5.1vw,5.4rem)] leading-[1.06] tracking-[-0.012em] md:max-w-[20ch]"
+          className="t-serif mt-8 max-w-[22ch] text-[clamp(2rem,5.1vw,5.4rem)] leading-[1.06] tracking-[-0.012em] md:max-w-[20ch] phone:mt-3 phone:max-w-none phone:text-[1.6rem] phone:leading-[1.14]"
         />
-        <Reveal stagger={0.1} className="mt-16 grid grid-cols-2 gap-8 border-t border-line pt-8 md:grid-cols-4">
+        <Reveal stagger={0.1} className="mt-16 grid grid-cols-2 gap-8 border-t border-line pt-8 md:grid-cols-4 phone:mt-6 phone:gap-x-4 phone:gap-y-4 phone:pt-5">
           {footnotes.map((f) => (
             <div key={f.label}>
-              <p className="t-serif t-num text-[clamp(2.2rem,4vw,3.6rem)] leading-none text-candle">{f.n}</p>
-              <p className="mt-2 text-sm text-smoke">{f.label}</p>
+              <p className="t-serif t-num text-[clamp(2.2rem,4vw,3.6rem)] leading-none text-candle phone:text-[1.9rem]">{f.n}</p>
+              <p className="mt-2 text-sm text-smoke phone:mt-1 phone:leading-snug">{f.label}</p>
             </div>
           ))}
         </Reveal>

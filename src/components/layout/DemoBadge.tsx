@@ -8,7 +8,7 @@ import { useBiz } from "@/components/preview/BizContext";
 
 const KEY = "suton-demo-badge-hidden";
 
-/** Small fixed "Concept site by Scale by Noon ↗" pill with a dismiss button. */
+/** Small "Concept site by Scale by Noon ↗" pill with a dismiss button: fixed on desktop, at the very end of the page on phones, so it never covers anything. */
 export function DemoBadge({ dict }: { dict: Dict }) {
   const biz = useBiz();
   const [dismissed, setHidden] = useState(false);
@@ -23,7 +23,7 @@ export function DemoBadge({ dict }: { dict: Dict }) {
   if (dismissed || stored) return null;
 
   return (
-    <div className="anim-fade fixed bottom-[5.6rem] left-3 z-[150] flex items-center rounded-full border border-cream/15 bg-night/80 pl-4 text-[0.78rem] text-cream shadow-[0_10px_40px_-10px_rgb(0_0_0/0.6)] backdrop-blur-md md:bottom-5 md:left-5" style={{ "--d": "2.2s" } as React.CSSProperties}>
+    <div className="anim-fade fixed bottom-[5.6rem] left-3 z-[150] flex items-center rounded-full border border-cream/15 bg-night/80 pl-4 text-[0.78rem] text-cream shadow-[0_10px_40px_-10px_rgb(0_0_0/0.6)] backdrop-blur-md md:bottom-5 md:left-5 phone:static phone:mx-auto phone:mb-4 phone:w-fit phone:max-w-[calc(100%-2rem)] phone:bg-char phone:shadow-none phone:backdrop-blur-none" style={{ "--d": "2.2s" } as React.CSSProperties}>
       <a href={site.agencyUrl} target="_blank" rel="noopener" className="flex h-9 items-center gap-2 hover:text-candle">
         <span className="h-1.5 w-1.5 rounded-full bg-candle" aria-hidden />
         {biz.preview ? `Pregled za ${biz.shortName} · Scale by Noon` : dict.badge.text} <span aria-hidden>↗</span>

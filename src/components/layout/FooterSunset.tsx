@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { useDesktopGSAP, prefersReducedMotion } from "@/lib/motion";
 import { useBiz } from "@/components/preview/BizContext";
 
 /** Giant footer wordmark; the sun behind it sets as you reach the end of the page. */
@@ -9,8 +9,8 @@ export function FooterSunset() {
   const biz = useBiz();
   const ref = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap }) => {
       if (prefersReducedMotion()) return;
       gsap.fromTo(
         "[data-sun]",

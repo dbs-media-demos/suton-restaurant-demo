@@ -34,7 +34,7 @@ export function Logo({ className, sub, subText = "kuhinja & vino" }: { className
       <Mark className="h-[1.9em] w-[1.9em]" animated />
       <span className="flex flex-col leading-none">
         <span
-          className={clsx("t-serif text-[1.35em]", biz.preview ? "block max-w-[11rem] truncate pb-0.5 tracking-[0.12em] sm:max-w-[16rem]" : "tracking-[0.28em]")}
+          className={clsx("t-serif text-[1.35em]", biz.preview ? "block max-w-[11rem] truncate pb-0.5 tracking-[0.12em] sm:max-w-[16rem] phone:max-w-[min(11rem,calc(100vw-13.5rem))]" : "tracking-[0.28em]")}
         >
           {biz.preview ? biz.shortName.toUpperCase() : "SUTON"}
         </span>

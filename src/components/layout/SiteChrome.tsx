@@ -12,6 +12,7 @@ import { Header, type NavLink } from "./Header";
 import { Footer } from "./Footer";
 import { MobileBar } from "./MobileBar";
 import { DemoBadge } from "./DemoBadge";
+import { PhoneRise } from "./PhoneRise";
 
 const navImages: Record<Exclude<PageKey, "privacy">, PhotoKey> = {
   home: "room/terrace-dusk",
@@ -60,8 +61,9 @@ export function SiteChrome({ locale, biz, children }: { locale: Locale; biz?: Bi
       />
       {children}
       <Footer locale={locale} dict={dict} biz={biz} />
-      <MobileBar dict={dict} reserveHref={pageHref(locale, "reservations")} />
+      <MobileBar dict={dict} menuHref={pageHref(locale, "menu")} reserveHref={pageHref(locale, "reservations")} />
       <DemoBadge dict={dict} />
+      <PhoneRise />
     </>
   );
 }

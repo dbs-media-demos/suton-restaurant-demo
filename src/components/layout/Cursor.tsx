@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "@/lib/gsap";
+import { loadKit, PHONE } from "@/lib/motion";
 import { useMediaQuery } from "@/lib/hooks";
 
 /**
@@ -13,24 +13,31 @@ export function Cursor() {
   const [label, setLabel] = useState<string | null>(null);
   const fine = useMediaQuery("(hover: hover) and (pointer: fine)");
   const reduce = useMediaQuery("(prefers-reduced-motion: reduce)");
-  const enabled = fine && !reduce;
+  const phone = useMediaQuery(PHONE);
+  const enabled = fine && !reduce && !phone;
 
   useEffect(() => {
     const el = ref.current;
     if (!enabled || !el) return;
-    const xTo = gsap.quickTo(el, "x", { duration: 0.45, ease: "power3.out" });
-    const yTo = gsap.quickTo(el, "y", { duration: 0.45, ease: "power3.out" });
+    let kit: Awaited<ReturnType<typeof loadKit>> | null = null;
+    let xTo: ((v: number) => void) | null = null;
+    let yTo: ((v: number) => void) | null = null;
+    void loadKit().then((k) => {
+      kit = k;
+      xTo = k.gsap.quickTo(el, "x", { duration: 0.45, ease: "power3.out" });
+      yTo = k.gsap.quickTo(el, "y", { duration: 0.45, ease: "power3.out" });
+    });
     let shown = false;
 
     const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
+      if (e.pointerType !== "mouse" || !kit) return;
       if (!shown) {
-        gsap.set(el, { x: e.clientX, y: e.clientY });
+        kit.gsap.set(el, { x: e.clientX, y: e.clientY });
         el.style.opacity = "1";
         shown = true;
       }
-      xTo(e.clientX);
-      yTo(e.clientY);
+      xTo?.(e.clientX);
+      yTo?.(e.clientY);
       const target = (e.target as Element | null)?.closest?.("[data-cursor]");
       setLabel(target ? target.getAttribute("data-cursor") : null);
     };

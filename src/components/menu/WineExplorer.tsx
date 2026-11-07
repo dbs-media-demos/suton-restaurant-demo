@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react";
 import clsx from "clsx";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { Flip } from "@/lib/flip";
+import { loadFlip, prefersReducedMotion, useDesktopModule } from "@/lib/motion";
 import { regions, wines, colorLabels, type RegionId, type WineColor } from "@/content/wines";
 import { formatRsd } from "@/content/menu";
 import type { Locale } from "@/lib/i18n";
@@ -26,17 +25,20 @@ export function WineExplorer({ locale, labels }: { locale: Locale; labels: Label
   const [color, setColor] = useState<WineColor | null>(null);
   const list = useRef<HTMLUListElement>(null);
 
+  const flip = useDesktopModule(loadFlip);
+
   const animate = (fn: () => void) => {
     const el = list.current;
-    const state = el && !prefersReducedMotion() ? Flip.getState(el.children) : null;
+    const kit = flip.current;
+    const state = el && kit && !prefersReducedMotion() ? kit.Flip.getState(el.children) : null;
     fn();
-    if (state)
+    if (state && kit)
       requestAnimationFrame(() =>
-        Flip.from(state, {
+        kit.Flip.from(state, {
           duration: 0.7,
           ease: "expo.out",
-          onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.7, stagger: 0.03 }),
-          onLeave: (els) => gsap.to(els, { opacity: 0, duration: 0.25 }),
+          onEnter: (els) => kit.gsap.fromTo(els, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.7, stagger: 0.03 }),
+          onLeave: (els) => kit.gsap.to(els, { opacity: 0, duration: 0.25 }),
         }),
       );
   };

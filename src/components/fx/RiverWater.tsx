@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { isPhone } from "@/lib/motion";
 
 const VERT = `
 attribute vec2 a_pos;
@@ -71,7 +72,7 @@ export function RiverWater({ src, aspect, waterline }: { src: string; aspect: nu
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isPhone()) return;
 
     let raf = 0;
     let running = false;

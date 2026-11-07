@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Below 768 px or any touch screen. Keep in sync with src/lib/motion.ts. */
+@custom-variant phone {
+  @media (max-width: 767.98px), (hover: none), (pointer: coarse) {
+    @slot;
+  }
+}
+
 /* ────────────────────────────────────────────────────────────────
    Suton — design tokens
    Night (warm charcoal), smoked oak, vranac (wine red),
@@ -453,6 +460,207 @@ em.t-serif,
   animation-timing-function: var(--ease-out-expo);
 }
 
+/* ────────────────────────── phones ──────────────────────────
+   Below 768 px or touch: simple, fast, stacked. Same words and photos as desktop.
+   Desktop never sees any of this. */
+
+@media (max-width: 767.98px), (hover: none), (pointer: coarse) {
+  :root {
+    --header-h: 4rem;
+    --bar-h: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+  /* The system's UI face + the two serif files are the only fonts a phone loads. */
+  html[class] {
+    --font-hanken: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html {
+    scrollbar-gutter: auto;
+  }
+  body {
+    font-size: 1rem;
+    line-height: 1.5;
+    padding-bottom: var(--bar-h);
+  }
+  [id$="-title"] {
+    scroll-margin-top: calc(var(--header-h) + 1.25rem);
+  }
+
+  .t-h1 {
+    font-size: 2rem;
+    line-height: 1.04;
+  }
+  .t-h2 {
+    font-size: 1.75rem;
+    line-height: 1.06;
+  }
+  .t-lead {
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .t-eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+  }
+
+  /* Nothing on a first screen is ever faded in. */
+  .anim-letter,
+  .anim-fade,
+  .anim-heading,
+  .anim-zoom {
+    animation: none;
+  }
+  .grain {
+    display: none;
+  }
+  .river-flow,
+  .flicker {
+    animation: none;
+  }
+  ::view-transition-old(.page),
+  ::view-transition-new(.page) {
+    animation: none;
+  }
+
+  /* First screen: the photo takes what the words leave, so Call and the next section's peek always fit. */
+  .hero-phone {
+    display: flex;
+    flex-direction: column;
+    min-height: min(calc(100svh - var(--bar-h) - 3.75rem), 56rem);
+  }
+  .hero-still {
+    flex: 1 1 9.5rem;
+  }
+  /* A phone on its side: photo beside the words, so Call still fits above the bar. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-phone {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      min-height: 0;
+    }
+    .hero-copy {
+      margin-top: 0;
+      padding-top: calc(var(--header-h) + 0.25rem);
+    }
+    .hero-copy > p:first-child {
+      display: none;
+    }
+    .hero-copy h1 {
+      margin-top: 0;
+      font-size: 1.35rem;
+    }
+  }
+
+  /* The fire, still: a few sparks drift up from the grill. Compositor only. */
+  .embers i {
+    position: absolute;
+    bottom: 22%;
+    left: calc(var(--x) * 1%);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--candle-2);
+    box-shadow: 0 0 6px 1px rgb(240 194 125 / 0.7);
+    opacity: 0;
+    animation: ember var(--t) ease-out var(--d) infinite;
+  }
+  .embers i:nth-child(1) { --x: 14; --t: 5.2s; --d: 0.2s; --drift: 12px; }
+  .embers i:nth-child(2) { --x: 27; --t: 6.4s; --d: 2.3s; --drift: -10px; }
+  .embers i:nth-child(3) { --x: 41; --t: 4.8s; --d: 1.1s; --drift: 16px; }
+  .embers i:nth-child(4) { --x: 56; --t: 6s; --d: 3.4s; --drift: -14px; }
+  .embers i:nth-child(5) { --x: 70; --t: 5.4s; --d: 0.7s; --drift: 10px; }
+  .embers i:nth-child(6) { --x: 84; --t: 6.8s; --d: 2.9s; --drift: -8px; }
+
+  /* Swipe rows: the next item half showing, and a vertical swipe still scrolls the page. */
+  .swipe {
+    display: flex;
+    gap: 0.75rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .swipe::-webkit-scrollbar {
+    display: none;
+  }
+  .swipe > * {
+    flex: none;
+    width: min(66vw, 18rem);
+    scroll-snap-align: start;
+  }
+  .swipe-wide > * {
+    width: min(78vw, 22rem);
+  }
+  .swipe-flush {
+    margin-inline: 0;
+  }
+
+  /* The ribbon's two drifting rows become one swipe row. */
+  .ribbon-rows {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .ribbon-rows::-webkit-scrollbar {
+    display: none;
+  }
+  .ribbon-row {
+    display: contents;
+  }
+  .ribbon-photo {
+    flex: none;
+    width: min(66vw, 18rem);
+    aspect-ratio: 3 / 2;
+    border-radius: 1rem;
+    scroll-snap-align: start;
+  }
+
+  /* One small fade-and-rise per section (PhoneRise), and a press you can feel. */
+  .rise-wait {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .rise-in {
+    transition:
+      opacity 0.6s var(--ease-out-expo),
+      transform 0.6s var(--ease-out-expo);
+  }
+  a,
+  button,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    a:active,
+    button:active,
+    summary:active {
+      transform: scale(0.975);
+      transition: transform 0.12s var(--ease-out-expo);
+    }
+  }
+}
+/* Tablets in phone mode: the stacked page stays a comfortable column. */
+@media (min-width: 768px) and (hover: none), (min-width: 768px) and (pointer: coarse) {
+  main {
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+}
+@keyframes ember {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
+  15% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate3d(var(--drift), -9rem, 0) scale(0.4); }
+}
+
+
 /* ─────────────────────── reduced motion ─────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -476,5 +684,8 @@ em.t-serif,
   }
   .marquee {
     animation: none;
+  }
+  .embers {
+    display: none;
   }
 }

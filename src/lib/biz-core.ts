@@ -72,6 +72,25 @@ export function dayRange(h: DayHours, lang: Lang) {
   return `${fmtHM(h.open, lang)} – ${fmtHM(h.close, lang)}`;
 }
 
+const SHORT_DAYS: Record<Lang, string[]> = {
+  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  sr: ["Ned", "Pon", "Uto", "Sre", "Čet", "Pet", "Sub"],
+};
+
+/** The whole week in a few groups of equal days: ["Pon – Pet 10:00 – 23:00", "Sub – Ned 10:00 – 24:00"] */
+export function hoursGroups(biz: Pick<Biz, "hours" | "lang">) {
+  if (!biz.hours) return [];
+  const groups: { from: number; to: number; range: string }[] = [];
+  for (const h of weekFromMonday(biz.hours)) {
+    const range = dayRange(h, biz.lang);
+    const last = groups[groups.length - 1];
+    if (last?.range === range) last.to = h.day;
+    else groups.push({ from: h.day, to: h.day, range });
+  }
+  const name = SHORT_DAYS[biz.lang];
+  return groups.map((g) => `${g.from === g.to ? name[g.from] : `${name[g.from]} – ${name[g.to]}`} ${g.range}`);
+}
+
 /** Monday-first week, for hour tables */
 export const weekFromMonday = (hours: DayHours[]) => (hours.length ? [...hours.slice(1), hours[0]] : []);
 

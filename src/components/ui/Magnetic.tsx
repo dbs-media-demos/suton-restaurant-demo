@@ -1,14 +1,14 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import { gsap, useGSAP, isTouch, prefersReducedMotion } from "@/lib/gsap";
+import { useDesktopGSAP, isTouch, prefersReducedMotion } from "@/lib/motion";
 
 /** Pulls its child toward the cursor (desktop only). */
 export function Magnetic({ children, strength = 0.35, className }: { children: ReactNode; strength?: number; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap }) => {
       const el = ref.current;
       if (!el || isTouch() || prefersReducedMotion()) return;
       const xTo = gsap.quickTo(el, "x", { duration: 0.8, ease: "elastic.out(1, 0.4)" });

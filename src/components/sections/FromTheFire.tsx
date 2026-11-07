@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { useDesktopGSAP, prefersReducedMotion } from "@/lib/motion";
 import { Photo } from "@/components/ui/Photo";
 import { VideoLoop } from "@/components/ui/VideoLoop";
 import type { Chapter } from "@/content/story";
@@ -21,13 +21,13 @@ type Props = {
 
 /**
  * "Iz vatre / From the fire": a pinned horizontal journey through the kitchen philosophy.
- * Desktop scrolls sideways with layered parallax photos; phones get a vertical story.
+ * Desktop scrolls sideways with layered parallax photos; phones swipe through the same chapters.
  */
 export function FromTheFire({ locale, eyebrow, title, intro, chapters, alts, link }: Props) {
   const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap }) => {
       const el = root.current;
       if (!el || prefersReducedMotion()) return;
       const mm = gsap.matchMedia();
@@ -68,21 +68,42 @@ export function FromTheFire({ locale, eyebrow, title, intro, chapters, alts, lin
         });
       });
 
-      mm.add("(max-width: 767px)", () => {
-        el.querySelectorAll<HTMLElement>("[data-panel]").forEach((panel) => {
-          const front = panel.querySelector("[data-front]");
-          if (front) gsap.fromTo(front, { yPercent: 20 }, { yPercent: -15, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: true } });
-        });
-      });
-
       return () => mm.revert();
     },
     { scope: root },
   );
 
   return (
-    <section ref={root} className="relative overflow-hidden bg-night md:h-[100svh]" aria-labelledby="fire-title">
-      <div data-track className="flex flex-col md:h-full md:w-max md:flex-row md:items-stretch">
+    <section ref={root} className="relative overflow-hidden bg-night md:h-[100svh] phone:order-[8] phone:h-auto phone:py-8" aria-labelledby="fire-title">
+      <div className="wrap hidden phone:block">
+        <p className="t-eyebrow text-candle">{eyebrow}</p>
+        <h2 className="t-h2 mt-3">{title}</h2>
+        <p className="mt-3 text-smoke">{intro}</p>
+        <Link href={link.href} className="mt-2 inline-block text-candle">
+          {link.label} →
+        </Link>
+        <ul className="swipe swipe-wide mt-5">
+          {chapters.map((c) => (
+            <li key={c.id} className="overflow-hidden rounded-[1.25rem] border border-line bg-char">
+              <div className="relative aspect-[3/2]">
+                <Photo k={c.images[0]} alt={alts[c.id][0]} sizes="min(78vw, 22rem)" quality={60} />
+                <div className="absolute -bottom-5 right-3 aspect-square w-[5.5rem] overflow-hidden rounded-xl border-4 border-char">
+                  <Photo k={c.images[1]} alt={alts[c.id][1]} sizes="5.5rem" quality={60} />
+                </div>
+              </div>
+              <div className="p-4 pt-3">
+                <p className="t-eyebrow t-num text-candle">
+                  {c.n} / {String(chapters.length).padStart(2, "0")}
+                </p>
+                <h3 className="t-serif mt-2 text-[1.6rem] italic leading-none">{c.title[locale]}</h3>
+                <p className="mt-2 text-[0.92rem] leading-snug text-cream/85">{c.text[locale]}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div data-track className="flex flex-col md:h-full md:w-max md:flex-row md:items-stretch phone:hidden">
         {/* Intro panel */}
         <div className="wrap flex shrink-0 flex-col justify-center py-24 md:w-[min(46rem,52vw)] md:py-0 md:pr-16">
           <p className="t-eyebrow text-candle">{eyebrow}</p>
@@ -147,7 +168,7 @@ export function FromTheFire({ locale, eyebrow, title, intro, chapters, alts, lin
         <div className="hidden w-[10vw] shrink-0 md:block" aria-hidden />
       </div>
 
-      <div className="wrap pointer-events-none absolute inset-x-0 bottom-8 hidden md:block" aria-hidden>
+      <div className="wrap pointer-events-none absolute inset-x-0 bottom-8 hidden md:block phone:hidden" aria-hidden>
         <div className="h-px w-full bg-cream/15">
           <div data-progress className="h-px origin-left scale-x-0 bg-candle" />
         </div>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { loadKit, prefersReducedMotion } from "@/lib/motion";
 import { useMediaQuery } from "@/lib/hooks";
 import { photos } from "@/content/photos";
 import { dietLabels, dietShort, formatRsd, type Dish } from "@/content/menu";
@@ -17,23 +17,31 @@ export function DishRows({ dishes, locale, theme = "night" }: { dishes: Dish[]; 
   const floatRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
-  const hoverable = useMediaQuery("(hover: hover) and (pointer: fine)");
+  const hoverable = useMediaQuery("(hover: hover) and (pointer: fine) and (min-width: 768px)");
 
   useEffect(() => {
     const el = floatRef.current;
     if (!el || !hoverable) return;
-    const xTo = gsap.quickTo(el, "x", { duration: 0.7, ease: "power3.out" });
-    const yTo = gsap.quickTo(el, "y", { duration: 0.7, ease: "power3.out" });
-    const rTo = gsap.quickTo(el, "rotation", { duration: 0.9, ease: "power3.out" });
     let lastX = 0;
-    const move = (e: PointerEvent) => {
-      xTo(e.clientX);
-      yTo(e.clientY);
-      if (!prefersReducedMotion()) rTo(Math.max(-12, Math.min(12, (e.clientX - lastX) * 0.6)));
-      lastX = e.clientX;
+    let move: ((e: PointerEvent) => void) | null = null;
+    let dead = false;
+    void loadKit().then(({ gsap }) => {
+      if (dead) return;
+      const xTo = gsap.quickTo(el, "x", { duration: 0.7, ease: "power3.out" });
+      const yTo = gsap.quickTo(el, "y", { duration: 0.7, ease: "power3.out" });
+      const rTo = gsap.quickTo(el, "rotation", { duration: 0.9, ease: "power3.out" });
+      move = (e: PointerEvent) => {
+        xTo(e.clientX);
+        yTo(e.clientY);
+        if (!prefersReducedMotion()) rTo(Math.max(-12, Math.min(12, (e.clientX - lastX) * 0.6)));
+        lastX = e.clientX;
+      };
+      window.addEventListener("pointermove", move, { passive: true });
+    });
+    return () => {
+      dead = true;
+      if (move) window.removeEventListener("pointermove", move);
     };
-    window.addEventListener("pointermove", move, { passive: true });
-    return () => window.removeEventListener("pointermove", move);
   }, [hoverable]);
 
   const muted = theme === "paper" ? "text-[#5e5246]" : "text-smoke";
@@ -52,19 +60,19 @@ export function DishRows({ dishes, locale, theme = "night" }: { dishes: Dish[]; 
                 onClick={() => !hoverable && setOpen(isOpen ? null : d.id)}
                 aria-expanded={hoverable ? undefined : isOpen}
                 className={clsx(
-                  "group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 py-5 text-left transition-[padding] duration-500 ease-[var(--ease-out-expo)] md:py-6",
+                  "group grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 py-5 text-left transition-[padding] duration-500 ease-[var(--ease-out-expo)] md:py-6 phone:gap-x-4 phone:py-3",
                   hoverable ? "md:hover:pl-4" : "",
                 )}
               >
-                <span className="min-w-0">
-                  <span className="t-serif block text-[clamp(1.35rem,2.4vw,2.1rem)] leading-tight tracking-[-0.01em] transition-[font-style] group-hover:italic">
+                <span className="min-w-0 phone:text-[0.875rem] phone:leading-snug">
+                  <span className="t-serif block text-[clamp(1.35rem,2.4vw,2.1rem)] leading-tight phone:text-[1.25rem] tracking-[-0.01em] transition-[font-style] group-hover:italic">
                     {d.name[locale]}
                   </span>
-                  <span className={clsx("mt-1.5 block text-[0.95rem]", muted)}>{d.desc[locale]}</span>
+                  <span className={clsx("mt-1.5 block text-[0.95rem] phone:mt-0.5 phone:inline phone:text-[0.875rem] phone:leading-snug", muted)}>{d.desc[locale]}</span>
                   {d.diet.length > 0 && (
-                    <span className="mt-2.5 flex flex-wrap gap-1.5">
+                    <span className="mt-2.5 flex flex-wrap gap-1.5 phone:ml-1.5 phone:mt-0 phone:inline-flex phone:translate-y-[-0.08em] phone:align-middle">
                       {d.diet.map((t) => (
-                        <span key={t} className="rounded-full border border-line px-2 py-0.5 text-[0.7rem] tracking-wide" title={dietLabels[t][locale]}>
+                        <span key={t} className="rounded-full border border-line px-2 py-0.5 text-[0.7rem] tracking-wide phone:px-1.5 phone:py-0 phone:text-[0.62rem] phone:leading-[1rem]" title={dietLabels[t][locale]}>
                           <span aria-hidden>{dietShort[t]}</span>
                           <span className="sr-only">{dietLabels[t][locale]}</span>
                         </span>
@@ -72,7 +80,13 @@ export function DishRows({ dishes, locale, theme = "night" }: { dishes: Dish[]; 
                     </span>
                   )}
                 </span>
-                <span className="t-num whitespace-nowrap text-[1.05rem]">{formatRsd(d.price, locale)}</span>
+                <span className="t-num flex items-baseline gap-2 whitespace-nowrap text-[1.05rem] phone:text-[0.95rem]">
+                  {formatRsd(d.price, locale)}
+                  {/* Rows open with a photo on a tap: this says so */}
+                  <span className={clsx("hidden font-light leading-none transition-transform duration-300 phone:inline", isOpen && "rotate-45")} aria-hidden>
+                    +
+                  </span>
+                </span>
               </Row>
               {!hoverable && (
                 <div className={clsx("grid transition-[grid-template-rows] duration-700 ease-[var(--ease-out-expo)]", isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>

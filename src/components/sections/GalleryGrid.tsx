@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { Flip } from "@/lib/flip";
+import { loadFlip, prefersReducedMotion, useDesktopModule } from "@/lib/motion";
 import { gallery, galleryCats, type GalleryCat } from "@/content/gallery";
 import { photos } from "@/content/photos";
 import type { Locale } from "@/lib/i18n";
@@ -21,18 +20,21 @@ export function GalleryGrid({ locale, labels }: { locale: Locale; labels: Labels
 
   const items = gallery.filter((g) => !cat || g.cat === cat);
 
+  const flip = useDesktopModule(loadFlip);
+
   const pick = (c: GalleryCat | null) => {
     const el = grid.current;
-    const state = el && !prefersReducedMotion() ? Flip.getState(el.children) : null;
+    const kit = flip.current;
+    const state = el && kit && !prefersReducedMotion() ? kit.Flip.getState(el.children) : null;
     setCat(c);
-    if (state)
+    if (state && kit)
       requestAnimationFrame(() =>
-        Flip.from(state, {
+        kit.Flip.from(state, {
           duration: 0.9,
           ease: "expo.out",
           absolute: true,
-          onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.9 }),
-          onLeave: (els) => gsap.to(els, { opacity: 0, scale: 0.9, duration: 0.35 }),
+          onEnter: (els) => kit.gsap.fromTo(els, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.9 }),
+          onLeave: (els) => kit.gsap.to(els, { opacity: 0, scale: 0.9, duration: 0.35 }),
         }),
       );
   };

@@ -2,10 +2,11 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { gsap, useGSAP, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { useDesktopGSAP, prefersReducedMotion, PHONE, DESKTOP } from "@/lib/motion";
 import { VideoLoop } from "@/components/ui/VideoLoop";
 import { OpenBadge } from "@/components/layout/OpenBadge";
 import { Magnetic } from "@/components/ui/Magnetic";
+import { Stars } from "@/components/ui/Stars";
 import type { Dict } from "@/i18n/dict";
 
 type Props = {
@@ -19,6 +20,23 @@ type Props = {
   /** A preview's name and tagline instead of SUTON and the house tagline. */
   word?: string;
   tagline?: string;
+  /** The phone's first screen: service + town, rating, today's hours and the number to call. */
+  phone: {
+    h1: string;
+    tel: string;
+    telDisplay: string;
+    rating: { value: string; count: string } | null;
+    hours: string[];
+  };
+};
+
+/** Sharp stills from the hero film (scripts/gen-hero-still.mjs): phones never load the film itself. */
+const STILL = {
+  avif: "/images/posters/hero-phone-640.avif 640w, /images/posters/hero-phone-900.avif 900w",
+  webp: "/images/posters/hero-phone-900.webp 900w",
+  // Desktop matches neither source and gets this empty pixel, so it never downloads the still
+  none: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+  sizes: "(min-width: 768px) 48rem, 100vw",
 };
 
 const WORD = "SUTON";
@@ -27,11 +45,11 @@ const WORD = "SUTON";
  * Cinematic hero: a full-screen film with a letter-by-letter title (CSS-only, fast LCP).
  * On scroll the film shrinks into the Suton arch while the story opens around it.
  */
-export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, word = WORD, tagline }: Props) {
+export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, word = WORD, tagline, phone }: Props) {
   const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopGSAP(
+    ({ gsap, ScrollTrigger }) => {
       const el = root.current;
       if (!el) return;
       const frame = el.querySelector<HTMLElement>("[data-frame]")!;
@@ -90,8 +108,69 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
   );
 
   return (
-    <section ref={root} className="relative h-[260svh]" aria-labelledby="hero-title">
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
+    <section ref={root} data-hero className="relative h-[260svh] phone:h-auto" aria-labelledby="hero-title">
+      <link rel="preload" as="image" type="image/avif" imageSrcSet={STILL.avif} imageSizes={STILL.sizes} media={PHONE} fetchPriority="high" />
+
+      {/* Phones: a still of the fire, then everything a guest came for, in the first paint. */}
+      <div className="hero-phone hidden phone:block">
+        <div className="hero-still relative overflow-hidden bg-char">
+          <picture>
+            <source media={PHONE} type="image/avif" srcSet={STILL.avif} sizes={STILL.sizes} />
+            <source media={PHONE} type="image/webp" srcSet={STILL.webp} sizes={STILL.sizes} />
+            <img src={STILL.none} alt="" width={900} height={720} fetchPriority="high" decoding="sync" className="absolute inset-0 h-full w-full object-cover object-[38%_60%]" />
+          </picture>
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(14_12_10/0.55),transparent_32%,transparent_55%,var(--night))]" />
+          <span className="embers" aria-hidden>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <i key={i} />
+            ))}
+          </span>
+        </div>
+        <div className="hero-copy wrap relative -mt-9 pb-5">
+          <p className="t-serif text-[1.2rem] italic leading-tight text-candle">{tagline ?? dict.tagline}</p>
+          <h1 className="t-serif mt-1 text-[2.1rem] leading-[1.04] tracking-[-0.012em] text-cream [text-wrap:balance]">{phone.h1}</h1>
+          {phone.rating && (
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 text-[0.92rem] text-cream">
+              <Stars value={Number(phone.rating.value.replace(",", "."))} className="text-[0.95rem] text-candle" label={`${phone.rating.value} / 5`} />
+              <span className="t-num font-medium">{phone.rating.value}</span>
+              <span className="text-cream/80">
+                {phone.rating.count} {dict.rating.reviews} {dict.rating.on}
+              </span>
+            </p>
+          )}
+          {phone.hours.length > 0 && (
+            <div className="mt-2.5 text-[0.84rem] leading-snug text-cream/80">
+              <div className="flex h-5 items-center text-cream">
+                <OpenBadge dict={dict} kitchen={false} />
+              </div>
+              <p className="t-num mt-1">
+                {phone.hours.map((h, i) => (
+                  <span key={h}>
+                    {i > 0 && " · "}
+                    <span className="whitespace-nowrap">{h}</span>
+                  </span>
+                ))}
+              </p>
+            </div>
+          )}
+          {phone.tel ? (
+            <a href={`tel:${phone.tel}`} className="mt-3.5 flex h-[3.25rem] items-center justify-center gap-2.5 rounded-full bg-candle font-medium text-night">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+              </svg>
+              <span className="t-num">
+                {dict.call} {phone.telDisplay}
+              </span>
+            </a>
+          ) : (
+            <Link href={reserveHref} className="mt-3.5 flex h-[3.25rem] items-center justify-center rounded-full bg-candle font-medium text-night">
+              {dict.reserve}
+            </Link>
+          )}
+        </div>
+      </div>
+
+      <div className="sticky top-0 h-[100svh] overflow-hidden phone:hidden">
         {/* Rotating ring of text around the arch (appears with the story). */}
         <div data-ring className="pointer-events-none absolute left-1/2 top-[var(--ring-y,40%)] hidden aspect-square w-[var(--ring,32rem)] -translate-x-1/2 -translate-y-1/2 opacity-0 md:block" aria-hidden>
           <svg viewBox="0 0 400 400" className="h-full w-full animate-[spin_60s_linear_infinite] text-smoke/40">
@@ -106,7 +185,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
 
         <div data-frame className="absolute inset-0 will-change-[clip-path]">
           <div data-film className="absolute inset-0">
-            <VideoLoop name="hero" poster="poster/hero" sizes="100vw" eager preloadPoster className="anim-zoom" />
+            <VideoLoop name="hero" poster="poster/hero" sizes="100vw" eager preloadPoster={DESKTOP} className="anim-zoom" />
           </div>
           <div data-shade className="vignette absolute inset-0" />
         </div>

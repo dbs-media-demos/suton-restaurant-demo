@@ -8,17 +8,17 @@ export function PreviewMap({ biz, dict }: { biz: Biz; dict: Dict }) {
   const embed = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
   return (
-    <section className="theme-night py-24 md:py-36" aria-labelledby="visit-title">
-      <div className="wrap grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+    <section className="theme-night py-24 md:py-36 phone:order-2 phone:py-7" aria-labelledby="visit-title">
+      <div className="wrap grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center phone:grid-cols-1">
         <div>
           <p className="t-eyebrow text-candle">Gde smo</p>
-          <h2 id="visit-title" className="t-h1 mt-6 max-w-[14ch]">
+          <h2 id="visit-title" className="t-h1 mt-6 max-w-[14ch] phone:mt-2.5 phone:max-w-none">
             Sto vas <em className="text-candle">čeka.</em>
           </h2>
-          {biz.address.full && <p className="t-lead mt-8 text-cream/85">{biz.address.full}</p>}
-          <OpenBadge dict={dict} className="mt-6 text-cream" />
+          {biz.address.full && <p className="t-lead mt-8 text-cream/85 phone:mt-2.5">{biz.address.full}</p>}
+          <OpenBadge dict={dict} className="mt-6 text-cream phone:mt-3 phone:h-5" />
           {biz.hours && (
-            <dl className="t-num mt-4 max-w-xs space-y-1 text-sm text-smoke">
+            <dl className="t-num mt-4 max-w-xs space-y-1 text-sm text-smoke phone:mt-2 phone:max-w-none phone:space-y-0.5">
               {weekFromMonday(biz.hours).map((h) => (
                 <div key={h.day} className="flex justify-between gap-4">
                   <dt>{DAY_NAMES.sr[h.day]}</dt>
@@ -27,11 +27,11 @@ export function PreviewMap({ biz, dict }: { biz: Biz; dict: Dict }) {
               ))}
             </dl>
           )}
-          <a href={directions} className="link-underline mt-10 inline-block text-cream">
+          <a href={directions} className="link-underline mt-10 inline-block text-cream phone:mt-3 phone:text-candle">
             Kako do nas ↗
           </a>
         </div>
-        <div className="relative aspect-[4/3] overflow-hidden rounded-sm border border-line">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-sm border border-line phone:hidden">
           <iframe src={embed} title={`Mapa: ${query}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="absolute inset-0 h-full w-full border-0" />
         </div>
       </div>

@@ -89,7 +89,7 @@ export function Header({ locale, dict, primary, all, homeHref, reserveHref, altM
         className={clsx(
           "fixed inset-x-0 top-0 z-[120] transition-[transform,background-color,border-color] duration-700 ease-[var(--ease-out-expo)]",
           hidden && !open ? "-translate-y-full" : "translate-y-0",
-          scrolled && !open ? "border-b border-line bg-night/75 backdrop-blur-xl" : "border-b border-transparent",
+          scrolled && !open ? "border-b border-line bg-night/75 backdrop-blur-xl phone:bg-night phone:backdrop-blur-none" : "border-b border-transparent",
         )}
         style={{ viewTransitionName: "site-header" }}
       >

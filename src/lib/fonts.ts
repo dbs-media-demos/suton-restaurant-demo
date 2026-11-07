@@ -15,8 +15,9 @@ export const displaySerif = localFont({
 });
 
 export const hanken = Hanken_Grotesk({
-  // Only the Latin file is preloaded; Latin Extended (č, ć, š, ž, đ) loads via unicode-range.
+  // Desktop only: phones set the system UI face (globals.css), so nothing here may be preloaded.
   subsets: ["latin"],
+  preload: false,
   variable: "--font-hanken",
   display: "swap",
 });
