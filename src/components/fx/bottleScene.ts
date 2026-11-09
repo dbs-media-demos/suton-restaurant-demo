@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { breathe, environment, gpuRenderer, warmUp } from "./warm";
 
 /*
  * The wine section, desktop only: the sommelier's bottle for a region, standing in the arch.
@@ -9,6 +10,8 @@ import * as THREE from "three";
  *   capsule closes the neck.
  * - Scroll turns it a little; picking a region spins it once and it comes back round as that
  *   region's wine (new label, glass and colour while its back is to you).
+ * - Built in idle time long before you reach it: in steps that hand the main thread back, its
+ *   shaders compiled and one frame drawn before the promise resolves. Runs only while on screen.
  */
 
 export type BottleWine = {
@@ -28,7 +31,8 @@ export type BottleHandle = {
   resize: () => void;
   /** Settle and render once, for the stills. */
   freeze: () => void;
-  dispose: () => void;
+  /** `free` also lets go of the WebGL context at once (when falling back to the still). */
+  dispose: (free?: boolean) => void;
 };
 
 type Opts = {
@@ -38,7 +42,6 @@ type Opts = {
   serif: string;
   sans: string;
   labels: { country: string; volume: string };
-  onReady: () => void;
 };
 
 const WINE: Record<BottleWine["kind"], [number, number, number]> = {
@@ -113,20 +116,24 @@ function capsuleGeometry() {
 const LABEL_W = 1024;
 const LABEL_H = 820;
 
-function paper() {
+async function paper() {
   const c = document.createElement("canvas");
   c.width = LABEL_W;
   c.height = LABEL_H;
   const g = c.getContext("2d")!;
   g.fillStyle = "#efe5d2";
   g.fillRect(0, 0, LABEL_W, LABEL_H);
-  // Laid paper: a little fibre and a slow tone.
+  // Laid paper: a little fibre and a slow tone. The grain is laid in slices, the main thread free in between.
   const img = g.getImageData(0, 0, LABEL_W, LABEL_H);
-  for (let i = 0; i < img.data.length; i += 4) {
-    const n = (Math.random() - 0.5) * 10;
-    img.data[i] += n;
-    img.data[i + 1] += n;
-    img.data[i + 2] += n * 0.8;
+  const slice = img.data.length / 8;
+  for (let from = 0; from < img.data.length; from += slice) {
+    for (let i = from; i < from + slice; i += 4) {
+      const n = (Math.random() - 0.5) * 10;
+      img.data[i] += n;
+      img.data[i + 1] += n;
+      img.data[i + 2] += n * 0.8;
+    }
+    await breathe();
   }
   g.putImageData(img, 0, 0);
   const grad = g.createRadialGradient(LABEL_W / 2, LABEL_H / 2, 100, LABEL_W / 2, LABEL_H / 2, 700);
@@ -285,20 +292,14 @@ function cellarEnvironment() {
   return env;
 }
 
-export function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): BottleHandle {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
-  renderer.setClearColor(0x0e0c0a, 1);
-  renderer.debug.checkShaderErrors = false;
+export async function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): Promise<BottleHandle> {
+  const renderer = gpuRenderer(canvas, 1.1);
+  await breathe();
 
   const scene = new THREE.Scene();
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const envRT = pmrem.fromScene(cellarEnvironment(), 0.03);
+  const envRT = await environment(renderer, cellarEnvironment(), 0.03);
   scene.environment = envRT.texture;
-  pmrem.dispose();
+  await breathe();
 
   const camera = new THREE.PerspectiveCamera(22, 3 / 4.6, 0.1, 60);
 
@@ -350,7 +351,7 @@ export function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): Bottle
   bottle.add(new THREE.Mesh(capGeo, capMat));
 
   // Label: wrapped on a slightly larger cylinder, front half of the body.
-  const base = paper();
+  const base = await paper();
   const labelCanvas = document.createElement("canvas");
   labelCanvas.width = LABEL_W;
   labelCanvas.height = LABEL_H;
@@ -412,11 +413,10 @@ export function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): Bottle
     dirty = true;
   }
 
-  let visible = true;
+  let visible = false;
   let running = false;
   let raf = 0;
   let dirty = true;
-  let ready = false;
   let last = performance.now();
 
   function tick(now: number) {
@@ -444,10 +444,6 @@ export function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): Bottle
     dirty = false;
     frame();
     renderer.render(scene, camera);
-    if (!ready) {
-      ready = true;
-      opts.onReady();
-    }
   }
 
   function setRunning(on: boolean) {
@@ -464,7 +460,12 @@ export function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): Bottle
 
   dress(opts.start);
   resize();
-  setRunning(true);
+  await breathe();
+  await warmUp(renderer, scene, camera, () => {
+    frame();
+    renderer.render(scene, camera);
+    dirty = false;
+  });
 
   return {
     show(i) {
@@ -502,7 +503,7 @@ export function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): Bottle
       frame();
       renderer.render(scene, camera);
     },
-    dispose() {
+    dispose(free) {
       setRunning(false);
       document.removeEventListener("visibilitychange", onVis);
       [glassGeo, wine.geometry, capGeo, labelGeo, back.geometry, floor.geometry].forEach((g) => g.dispose());
@@ -510,6 +511,7 @@ export function createBottleScene(canvas: HTMLCanvasElement, opts: Opts): Bottle
       labelTex.dispose();
       envRT.dispose();
       renderer.dispose();
+      if (free) renderer.forceContextLoss();
     },
   };
 }

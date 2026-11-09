@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { isPhone } from "@/lib/motion";
+import { stillOnly } from "@/lib/live3d";
 
 const VERT = `
 attribute vec2 a_pos;
@@ -72,7 +73,8 @@ export function RiverWater({ src, aspect, waterline }: { src: string; aspect: nu
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isPhone()) return;
+    // A computer the 3D scenes found too slow keeps the photo too.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || isPhone() || stillOnly()) return;
 
     let raf = 0;
     let running = false;

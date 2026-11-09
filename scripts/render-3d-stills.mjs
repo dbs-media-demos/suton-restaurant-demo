@@ -55,8 +55,11 @@ async function bundle(tmp, name, code) {
     tmp,
     "counter",
     `import { createCounterScene } from ${src("components/fx/counterScene")};
-const h = createCounterScene(document.querySelector("canvas")!, { video: "/video/grill.mp4", poster: "/images/posters/grill.jpg", onReady: () => ((window as any).__ready = true) });
-(window as any).__freeze = () => h.freeze(${FRAME});`,
+createCounterScene(document.querySelector("canvas")!, { video: "/video/grill.mp4", poster: "/images/posters/grill.jpg" }).then((h) => {
+  h.setVisible(true);
+  (window as any).__freeze = () => h.freeze(${FRAME});
+  (window as any).__ready = true;
+});`,
   );
   await bundle(
     tmp,
@@ -65,8 +68,11 @@ const h = createCounterScene(document.querySelector("canvas")!, { video: "/video
 import { regions, wines, cellarPicks } from ${src("content/wines")};
 const picks = regions.map((r) => { const w = wines.find((x) => x.id === cellarPicks[r.id])!; return { name: w.name, producer: w.producer, grape: w.grape, vintage: w.vintage, region: r.name.sr, kind: w.color }; });
 document.fonts.load("400 40px LabelSerif").then(() => document.fonts.load("italic 400 40px LabelSerif")).then(() => document.fonts.load("500 20px LabelSans")).then(() => {
-  const h = createBottleScene(document.querySelector("canvas")!, { wines: picks, start: regions.findIndex((r) => r.id === "zupa"), serif: "LabelSerif", sans: "LabelSans", labels: { country: "Srbija", volume: "0,75 l · 13,5 % vol" }, onReady: () => ((window as any).__ready = true) });
+  return createBottleScene(document.querySelector("canvas")!, { wines: picks, start: regions.findIndex((r) => r.id === "zupa"), serif: "LabelSerif", sans: "LabelSans", labels: { country: "Srbija", volume: "0,75 l · 13,5 % vol" } });
+}).then((h) => {
+  h.setVisible(true);
   (window as any).__freeze = () => h.freeze();
+  (window as any).__ready = true;
 });`,
   );
   const page = (name) =>

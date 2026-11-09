@@ -5,7 +5,8 @@ import clsx from "clsx";
 import { SplitReveal, Reveal, Parallax } from "@/components/ui/Reveal";
 import { Photo } from "@/components/ui/Photo";
 import { Button } from "@/components/ui/Button";
-import { useDesktopGSAP, prefersReducedMotion, PHONE, DESKTOP } from "@/lib/motion";
+import { useDesktopGSAP, PHONE, DESKTOP } from "@/lib/motion";
+import { inTurn, keepStills, readyFor3D, STILL_EVENT, watchFrames } from "@/lib/live3d";
 import type { BottleHandle, BottleWine } from "@/components/fx/bottleScene";
 import type { Locale } from "@/lib/i18n";
 
@@ -36,7 +37,6 @@ const STILL = {
   phoneWebp: "/images/posters/cellar-phone-800.webp 800w",
   none: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
 };
-const LIVE_3D = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 
 const words = {
   sr: { pick: "Preporuka", country: "Srbija", volume: "0,75 l · 13,5 % vol", bottle: "boca", vine: "Vinova loza na zalasku sunca", list: "180 etiketa · samo Srbija i region" },
@@ -55,68 +55,96 @@ export function WineCellar({ locale, eyebrow, title, text, cta, href, rows, star
   const scene = useRef<BottleHandle | null>(null);
   const [live, setLive] = useState(false);
   const [active, setActive] = useState(start);
+  const activeRef = useRef(start);
   const startPick = rows[start].pick;
 
+  // Built in idle time after the hero's verdict (src/lib/live3d.ts), long before you scroll here:
+  // the still stays until it's compiled and drawn once, and it runs only while on screen.
   useEffect(() => {
     const canvas = canvasRef.current;
     const el = stage.current;
     if (!canvas || !el) return;
-    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-    if (!window.matchMedia(LIVE_3D).matches || prefersReducedMotion() || saveData) return;
 
     let alive = true;
     let handle: BottleHandle | null = null;
+    let watch: ReturnType<typeof watchFrames> | undefined;
+    let onScreen = false;
+    let leaving: { handle: BottleHandle; timer: number } | undefined;
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       handle?.setPointer(((e.clientX - r.left) / r.width) * 2 - 1, -(((e.clientY - r.top) / r.height) * 2 - 1));
     };
     const onLeave = () => handle?.setPointer(0, 0);
     const onResize = () => handle?.resize();
+    const visible = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        handle?.setVisible(onScreen);
+      },
+      { rootMargin: "100px 0px" },
+    );
 
-    const start3d = async () => {
+    // Too slow for this computer: back to the still, the loop stops, the renderer goes.
+    const fallBack = () => {
+      if (!handle) return;
+      const h = handle;
+      handle = null;
+      scene.current = null;
+      watch?.stop();
+      visible.disconnect();
+      h.setVisible(false);
+      setLive(false);
+      leaving = { handle: h, timer: window.setTimeout(() => (h.dispose(true), (leaving = undefined)), 1100) };
+    };
+    window.addEventListener(STILL_EVENT, fallBack);
+
+    void inTurn(async () => {
+      if (!(await readyFor3D()) || !alive) return;
       const [{ createBottleScene }] = await Promise.all([import("@/components/fx/bottleScene"), document.fonts.ready]);
       if (!alive) return;
       const css = getComputedStyle(document.documentElement);
+      const first = activeRef.current;
       try {
-        handle = createBottleScene(canvas, {
+        handle = await createBottleScene(canvas, {
           wines: rows.map((r) => r.pick),
-          start: active,
+          start: first,
           serif: css.getPropertyValue("--font-display-serif").trim() || "Georgia, serif",
           sans: css.getPropertyValue("--font-hanken").trim() || "sans-serif",
           labels: { country: t.country, volume: t.volume },
-          onReady: () => setLive(true),
         });
-      } catch {
-        return;
+      } catch (e) {
+        if ((e as Error).name === "NoGpu") keepStills();
+        return; // the still stays
       }
+      if (!alive) return handle.dispose();
+      // A region picked while it was warming up.
+      if (activeRef.current !== first) handle.show(activeRef.current);
       scene.current = handle;
       visible.observe(el);
       el.addEventListener("pointermove", onMove);
       el.addEventListener("pointerleave", onLeave);
       window.addEventListener("resize", onResize);
-    };
-    // Built when the section comes near, paused whenever it's off screen.
-    const near = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        near.disconnect();
-        void start3d();
-      },
-      { rootMargin: "600px 0px" },
-    );
-    const visible = new IntersectionObserver(([entry]) => handle?.setVisible(entry.isIntersecting), { rootMargin: "100px 0px" });
-    near.observe(el);
+      setLive(true);
+      watch = watchFrames(() => onScreen);
+      void watch.verdict.then((slow) => slow && keepStills());
+    });
+
     return () => {
       alive = false;
-      near.disconnect();
+      window.removeEventListener(STILL_EVENT, fallBack);
       visible.disconnect();
+      watch?.stop();
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("resize", onResize);
       handle?.dispose();
+      if (leaving) {
+        window.clearTimeout(leaving.timer);
+        leaving.handle.dispose(true);
+      }
       scene.current = null;
     };
-    // Built once; `active` and `rows` are read at that moment and driven by show() afterwards.
+    // Built once; `rows` and the labels are read at that moment and driven by show() afterwards.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -131,6 +159,7 @@ export function WineCellar({ locale, eyebrow, title, text, cta, href, rows, star
   );
 
   const pick = (i: number) => {
+    activeRef.current = i;
     setActive(i);
     scene.current?.show(i);
   };

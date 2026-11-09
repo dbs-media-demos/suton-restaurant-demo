@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { breathe, environment, gpuRenderer, warmUp } from "./warm";
+import { GRILL_LIGHT } from "./grillLight";
 
 /*
  * The hero, desktop only: a glass of Serbian red on the oak counter, the grill working behind it.
@@ -11,10 +13,13 @@ import * as THREE from "three";
  * - The counter is oiled oak. It reflects the fire at a grazing angle and carries the glass's
  *   long shadow, with the ruby light the wine focuses inside it.
  * - The grill film is a texture, mipmapped so the wine and the counter can see it blurred, and
- *   its brightness drives the light: the shadow and the ruby spot flicker with the flames.
+ *   its brightness drives the light: the shadow and the ruby spot flicker with the flames. The
+ *   brightness is measured ahead of time (scripts/grill-light.mjs) and looked up by the film's
+ *   clock, so the video is never read back from the GPU.
  *
  * `setProgress(p)` (0..1, the hero's scroll) brings the camera round to the glass and centres it
- * for the arch. Nothing renders while the hero is off screen.
+ * for the arch. Built in steps that hand the main thread back, its shaders compiled and one frame
+ * drawn before the promise resolves; nothing runs until `setVisible(true)` or while it's off screen.
  */
 
 export type CounterHandle = {
@@ -24,14 +29,14 @@ export type CounterHandle = {
   resize: () => void;
   /** Hold one frame of the film and stop the clocks (for the stills phones are given). */
   freeze: (seconds: number) => Promise<void>;
-  dispose: () => void;
+  /** `free` also lets go of the WebGL context at once (when falling back to the still). */
+  dispose: (free?: boolean) => void;
 };
 
 type Opts = {
   /** The grill film and a poster to show until its first frame. */
   video: string;
   poster: string;
-  onReady: () => void;
   /** Called once the wine has been swirled by hand (the hint can go). */
   onSwirl?: () => void;
 };
@@ -360,26 +365,19 @@ function barEnvironment() {
   return env;
 }
 
-export function createCounterScene(canvas: HTMLCanvasElement, opts: Opts): CounterHandle {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
-  renderer.setClearColor(0x0e0c0a, 1);
-  // The shaders are known good; skip the per-program check (and D3D precision notes in the console).
-  renderer.debug.checkShaderErrors = false;
+export async function createCounterScene(canvas: HTMLCanvasElement, opts: Opts): Promise<CounterHandle> {
+  const renderer = gpuRenderer(canvas, 1.0);
+  await breathe();
 
   const scene = new THREE.Scene();
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const envRT = pmrem.fromScene(barEnvironment(), 0.02);
+  const envRT = await environment(renderer, barEnvironment(), 0.02);
   scene.environment = envRT.texture;
-  pmrem.dispose();
+  await breathe();
 
   const camera = new THREE.PerspectiveCamera(24, 16 / 10, 0.1, 80);
 
-  // The film: poster first, then the video once it plays.
-  const poster = new THREE.TextureLoader().load(opts.poster, () => (dirty = true));
+  // The film: poster first (the first frame waits for it), then the video once it plays.
+  const poster = await new THREE.TextureLoader().loadAsync(opts.poster);
   poster.colorSpace = THREE.NoColorSpace;
   poster.generateMipmaps = true;
   poster.minFilter = THREE.LinearMipmapLinearFilter;
@@ -616,28 +614,22 @@ export function createCounterScene(canvas: HTMLCanvasElement, opts: Opts): Count
   const glassScreen = new THREE.Vector2(0.6, 0);
 
   // ── firelight from the film ──
-  const probe = document.createElement("canvas");
-  probe.width = 16;
-  probe.height = 9;
-  const probeCtx = probe.getContext("2d", { willReadFrequently: true });
   let flickerTarget = 1;
   let probeTick = 0;
   function sampleFire() {
-    if (!probeCtx || !videoOn || video.readyState < 2) return;
-    probeCtx.drawImage(video, 0, 0, 16, 9);
-    const d = probeCtx.getImageData(0, 0, 16, 9).data;
-    let s = 0;
-    for (let i = 0; i < d.length; i += 4) s += d[i] * 0.5 + d[i + 1] * 0.4 + d[i + 2] * 0.1;
-    const lum = s / (d.length / 4) / 255;
+    if (!videoOn || video.readyState < 2) return;
+    const { step, duration, values } = GRILL_LIGHT;
+    const at = ((video.currentTime % duration) + duration) % duration * step;
+    const i = Math.floor(at);
+    const lum = THREE.MathUtils.lerp(values[i % values.length], values[(i + 1) % values.length], at - i);
     flickerTarget = THREE.MathUtils.clamp(0.55 + lum * 1.6, 0.75, 1.35);
   }
 
   // ── loop ──
-  let visible = true;
+  let visible = false;
   let running = false;
   let raf = 0;
   let dirty = true;
-  let ready = false;
   let frozen = false;
   let last = performance.now();
   let time = 0;
@@ -682,10 +674,6 @@ export function createCounterScene(canvas: HTMLCanvasElement, opts: Opts): Count
     const gs = new THREE.Vector3(0, 1.45, 0).project(camera);
     glassScreen.set(gs.x, gs.y);
     renderer.render(scene, camera);
-    if (!ready) {
-      ready = true;
-      opts.onReady();
-    }
   }
 
   function setRunning(on: boolean) {
@@ -705,7 +693,11 @@ export function createCounterScene(canvas: HTMLCanvasElement, opts: Opts): Count
   document.addEventListener("visibilitychange", onVis);
 
   resize();
-  setRunning(true);
+  await breathe();
+  await warmUp(renderer, scene, camera, () => {
+    frame();
+    renderer.render(scene, camera);
+  });
 
   return {
     setPointer: onPointer,
@@ -742,7 +734,7 @@ export function createCounterScene(canvas: HTMLCanvasElement, opts: Opts): Count
       renderer.render(scene, camera);
       renderer.render(scene, camera);
     },
-    dispose() {
+    dispose(free) {
       setRunning(false);
       document.removeEventListener("visibilitychange", onVis);
       video.removeAttribute("src");
@@ -756,6 +748,7 @@ export function createCounterScene(canvas: HTMLCanvasElement, opts: Opts): Count
       bg.geometry.dispose();
       [frontMat, backMat, wineMat, counterMat, bgMat].forEach((m) => m.dispose());
       renderer.dispose();
+      if (free) renderer.forceContextLoss();
     },
   };
 }

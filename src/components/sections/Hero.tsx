@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useDesktopGSAP, prefersReducedMotion, PHONE, DESKTOP } from "@/lib/motion";
+import { inTurn, keepStills, readyFor3D, STILL_EVENT, wait, watchFrames } from "@/lib/live3d";
 import type { CounterHandle } from "@/components/fx/counterScene";
 import { OpenBadge } from "@/components/layout/OpenBadge";
 import { Magnetic } from "@/components/ui/Magnetic";
@@ -44,9 +45,6 @@ const DESK = {
   webp: "/images/posters/hero-3d-2200.webp 2200w",
 };
 
-/** Live 3D only for a big screen with a mouse (and no ask for less motion or data). */
-const LIVE_3D = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
-
 const WORD = "SUTON";
 
 /**
@@ -62,58 +60,80 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
   const [live, setLive] = useState(false);
   const [hint, setHint] = useState<"off" | "on" | "done">("off");
 
-  // The glass on the counter. three.js is only imported here, after load, once the check passes.
+  // The glass on the counter. three.js is only imported here, after load, once the check passes
+  // (src/lib/live3d.ts). The still stays until the scene is built, compiled and drawn once.
   useEffect(() => {
     const canvas = canvasRef.current;
     const el = root.current;
     if (!canvas || !el) return;
-    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-    if (!window.matchMedia(LIVE_3D).matches || prefersReducedMotion() || saveData) return;
 
     let alive = true;
     let handle: CounterHandle | null = null;
     let io: IntersectionObserver | undefined;
-    let idle: number | undefined;
+    let watch: ReturnType<typeof watchFrames> | undefined;
+    let onScreen = false;
+    let leaving: { handle: CounterHandle; timer: number } | undefined;
     const onMove = (e: PointerEvent) => handle?.setPointer((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
     const onResize = () => handle?.resize();
 
-    const start = async () => {
+    // Too slow for this computer: the canvas fades back to the still, the loop stops, the renderer goes.
+    const fallBack = () => {
+      if (!handle) return;
+      const h = handle;
+      handle = null;
+      scene.current = null;
+      watch?.stop();
+      io?.disconnect();
+      h.setVisible(false);
+      setLive(false);
+      setHint("done");
+      leaving = { handle: h, timer: window.setTimeout(() => (h.dispose(true), (leaving = undefined)), 1500) };
+    };
+    window.addEventListener(STILL_EVENT, fallBack);
+
+    void inTurn(async () => {
+      if (!(await readyFor3D()) || !alive) return;
       const { createCounterScene } = await import("@/components/fx/counterScene");
       if (!alive) return;
       try {
-        handle = createCounterScene(canvas, {
+        handle = await createCounterScene(canvas, {
           video: "/video/grill.mp4",
           poster: "/images/posters/grill.jpg",
-          onReady: () => {
-            setLive(true);
-            setHint((h) => (h === "off" ? "on" : h));
-          },
           onSwirl: () => setHint("done"),
         });
-      } catch {
-        return; // no WebGL: the still stays
+      } catch (e) {
+        if ((e as Error).name === "NoGpu") keepStills();
+        return; // the still stays
       }
+      if (!alive) return handle.dispose();
       scene.current = handle;
-      io = new IntersectionObserver(([entry]) => handle?.setVisible(entry.isIntersecting));
+      io = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting;
+        handle?.setVisible(onScreen);
+      });
       io.observe(el);
       window.addEventListener("pointermove", onMove, { passive: true });
       window.addEventListener("resize", onResize);
-    };
-    const onLoad = () => {
-      const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
-      idle = ric(() => void start(), { timeout: 1500 }) as number;
-    };
-    if (document.readyState === "complete") onLoad();
-    else window.addEventListener("load", onLoad, { once: true });
+      setLive(true);
+      setHint((h) => (h === "off" ? "on" : h));
+      watch = watchFrames(() => onScreen);
+      void watch.verdict.then((slow) => slow && keepStills());
+      // The bottle further down warms up after this verdict (or straight away if the hero's off screen).
+      await Promise.race([watch.verdict, wait(3500)]);
+    });
 
     return () => {
       alive = false;
-      window.removeEventListener("load", onLoad);
-      if (idle !== undefined) (window.cancelIdleCallback ?? window.clearTimeout)(idle);
+      window.removeEventListener(STILL_EVENT, fallBack);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("resize", onResize);
+      watch?.stop();
       io?.disconnect();
       handle?.dispose();
+      if (leaving) {
+        window.clearTimeout(leaving.timer);
+        leaving.handle.dispose(true);
+      }
       scene.current = null;
     };
   }, []);
