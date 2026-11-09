@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useDesktopGSAP, prefersReducedMotion, PHONE, DESKTOP } from "@/lib/motion";
-import { VideoLoop } from "@/components/ui/VideoLoop";
+import type { CounterHandle } from "@/components/fx/counterScene";
 import { OpenBadge } from "@/components/layout/OpenBadge";
 import { Magnetic } from "@/components/ui/Magnetic";
 import { Stars } from "@/components/ui/Stars";
@@ -30,7 +30,7 @@ type Props = {
   };
 };
 
-/** Sharp stills from the hero film (scripts/gen-hero-still.mjs): phones never load the film itself. */
+/** Stills rendered from the 3D counter scene (scripts/render-3d-stills.mjs): phones never load three.js or the film. */
 const STILL = {
   avif: "/images/posters/hero-phone-640.avif 640w, /images/posters/hero-phone-900.avif 900w",
   webp: "/images/posters/hero-phone-900.webp 900w",
@@ -38,15 +38,85 @@ const STILL = {
   none: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
   sizes: "(min-width: 768px) 48rem, 100vw",
 };
+/** The same scene, framed for a desktop's first screen: shown at once, and stays under the live canvas. */
+const DESK = {
+  avif: "/images/posters/hero-3d-1600.avif 1600w, /images/posters/hero-3d-2200.avif 2200w, /images/posters/hero-3d-2860.avif 2860w",
+  webp: "/images/posters/hero-3d-2200.webp 2200w",
+};
+
+/** Live 3D only for a big screen with a mouse (and no ask for less motion or data). */
+const LIVE_3D = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 
 const WORD = "SUTON";
 
 /**
- * Cinematic hero: a full-screen film with a letter-by-letter title (CSS-only, fast LCP).
- * On scroll the film shrinks into the Suton arch while the story opens around it.
+ * Hero: a real-time glass of red on the kitchen counter in front of the grill (desktop with a
+ * mouse; a still rendered from the same scene everywhere else), the name across it.
+ * On scroll the camera comes round to the glass as the frame closes into the Suton arch and the
+ * story opens around it.
  */
 export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, word = WORD, tagline, phone }: Props) {
   const root = useRef<HTMLElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const scene = useRef<CounterHandle | null>(null);
+  const [live, setLive] = useState(false);
+  const [hint, setHint] = useState<"off" | "on" | "done">("off");
+
+  // The glass on the counter. three.js is only imported here, after load, once the check passes.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const el = root.current;
+    if (!canvas || !el) return;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (!window.matchMedia(LIVE_3D).matches || prefersReducedMotion() || saveData) return;
+
+    let alive = true;
+    let handle: CounterHandle | null = null;
+    let io: IntersectionObserver | undefined;
+    let idle: number | undefined;
+    const onMove = (e: PointerEvent) => handle?.setPointer((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+    const onResize = () => handle?.resize();
+
+    const start = async () => {
+      const { createCounterScene } = await import("@/components/fx/counterScene");
+      if (!alive) return;
+      try {
+        handle = createCounterScene(canvas, {
+          video: "/video/grill.mp4",
+          poster: "/images/posters/grill.jpg",
+          onReady: () => {
+            setLive(true);
+            setHint((h) => (h === "off" ? "on" : h));
+          },
+          onSwirl: () => setHint("done"),
+        });
+      } catch {
+        return; // no WebGL: the still stays
+      }
+      scene.current = handle;
+      io = new IntersectionObserver(([entry]) => handle?.setVisible(entry.isIntersecting));
+      io.observe(el);
+      window.addEventListener("pointermove", onMove, { passive: true });
+      window.addEventListener("resize", onResize);
+    };
+    const onLoad = () => {
+      const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
+      idle = ric(() => void start(), { timeout: 1500 }) as number;
+    };
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
+
+    return () => {
+      alive = false;
+      window.removeEventListener("load", onLoad);
+      if (idle !== undefined) (window.cancelIdleCallback ?? window.clearTimeout)(idle);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("resize", onResize);
+      io?.disconnect();
+      handle?.dispose();
+      scene.current = null;
+    };
+  }, []);
 
   useDesktopGSAP(
     ({ gsap, ScrollTrigger }) => {
@@ -94,10 +164,20 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
-        scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 1, invalidateOnRefresh: true },
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+          invalidateOnRefresh: true,
+          // The camera comes round to the glass and centres it as the frame closes into the arch.
+          onUpdate: (self) => {
+            scene.current?.setProgress(self.progress);
+            if (self.progress > 0.04) setHint((h) => (h === "on" ? "done" : h));
+          },
+        },
       });
       tl.fromTo(frame, { clipPath: full }, { clipPath: arch, duration: 1, ease: "power2.inOut" }, 0)
-        .fromTo("[data-film]", { scale: 1.12 }, { scale: 1, duration: 1 }, 0)
         .to("[data-title]", { yPercent: -18, opacity: 0, duration: 0.45 }, 0)
         .to("[data-shade]", { opacity: 0, duration: 0.6 }, 0.2)
         .fromTo("[data-story]", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.12, ease: "power2.out" }, 0.55)
@@ -110,6 +190,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
   return (
     <section ref={root} data-hero className="relative h-[260svh] phone:h-auto" aria-labelledby="hero-title">
       <link rel="preload" as="image" type="image/avif" imageSrcSet={STILL.avif} imageSizes={STILL.sizes} media={PHONE} fetchPriority="high" />
+      <link rel="preload" as="image" type="image/avif" imageSrcSet={DESK.avif} imageSizes="max(100vw, 220vh)" media={DESKTOP} fetchPriority="high" />
 
       {/* Phones: a still of the fire, then everything a guest came for, in the first paint. */}
       <div className="hero-phone hidden phone:block">
@@ -117,7 +198,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
           <picture>
             <source media={PHONE} type="image/avif" srcSet={STILL.avif} sizes={STILL.sizes} />
             <source media={PHONE} type="image/webp" srcSet={STILL.webp} sizes={STILL.sizes} />
-            <img src={STILL.none} alt="" width={900} height={720} fetchPriority="high" decoding="sync" className="absolute inset-0 h-full w-full object-cover object-[38%_60%]" />
+            <img src={STILL.none} alt="" width={900} height={720} fetchPriority="high" decoding="sync" className="absolute inset-0 h-full w-full object-cover object-[62%_55%]" />
           </picture>
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(14_12_10/0.55),transparent_32%,transparent_55%,var(--night))]" />
           <span className="embers" aria-hidden>
@@ -183,15 +264,35 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
           </svg>
         </div>
 
-        <div data-frame className="absolute inset-0 will-change-[clip-path]">
+        <div data-frame className="absolute inset-0 bg-char will-change-[clip-path]">
+          {/* A glass of red on the kitchen counter, the grill behind: a still at once, the live scene over it. */}
           <div data-film className="absolute inset-0">
-            <VideoLoop name="hero" poster="poster/hero" sizes="100vw" eager preloadPoster={DESKTOP} className="anim-zoom" />
+            <picture>
+              <source media={DESKTOP} type="image/avif" srcSet={DESK.avif} sizes="max(100vw, 220vh)" />
+              <source media={DESKTOP} type="image/webp" srcSet={DESK.webp} sizes="max(100vw, 220vh)" />
+              <img src={STILL.none} alt="" width={2640} height={1200} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[78%_50%]" />
+            </picture>
           </div>
-          <div data-shade className="vignette absolute inset-0" />
+          <canvas
+            ref={canvasRef}
+            aria-hidden
+            className={`absolute inset-0 h-full w-full transition-opacity duration-[1400ms] ease-out ${live ? "opacity-100" : "opacity-0"}`}
+          />
+          <div data-shade className="vignette pointer-events-none absolute inset-0" />
         </div>
 
+        <p
+          aria-hidden
+          className={`t-eyebrow pointer-events-none absolute right-[10%] top-[17%] z-[2] flex items-center gap-2.5 text-cream/75 transition-opacity duration-700 ${hint === "on" ? "opacity-100" : "opacity-0"}`}
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4 animate-[spin_5s_linear_infinite] text-candle" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4" />
+          </svg>
+          {dict.cursor.swirl}
+        </p>
+
         <div data-title className="wrap relative z-[2] flex h-full flex-col justify-end pb-[max(7rem,14svh)] md:pb-16">
-          <p className="t-eyebrow anim-fade text-cream/85" style={{ "--d": "0.2s" } as React.CSSProperties}>
+          <p className="t-eyebrow text-cream/85">
             {eyebrow}
           </p>
           <h1 id="hero-title" className="t-display mt-4 text-cream">
@@ -203,18 +304,18 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
               style={word.length > 7 ? { fontSize: `clamp(2.6rem, ${Math.max(5, 64 / word.length)}vw, 10rem)`, letterSpacing: "-0.02em" } : undefined}
             >
               {word.split("").map((ch, i) => (
-                <span key={i} className="anim-letter" style={{ "--i": i, "--d": "0.15s" } as React.CSSProperties}>
+                <span key={i} className="inline-block">
                   {ch === " " ? "\u00a0" : ch}
                 </span>
               ))}
             </span>
           </h1>
           <div className="mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:justify-between">
-            <div className="anim-fade max-w-md" style={{ "--d": "0.7s" } as React.CSSProperties}>
+            <div className="max-w-md">
               <p className="t-serif text-[clamp(1.5rem,2.6vw,2.2rem)] italic leading-tight text-candle">{tagline ?? dict.tagline}</p>
               <p className="mt-3 text-cream/85">{sub}</p>
             </div>
-            <div className="anim-fade flex flex-wrap items-center gap-3" style={{ "--d": "0.9s" } as React.CSSProperties}>
+            <div className="flex flex-wrap items-center gap-3">
               <Magnetic>
                 <Link href={reserveHref} className="inline-flex h-13 min-h-12 items-center rounded-full bg-candle px-7 font-medium text-night transition-colors hover:bg-candle-2">
                   {dict.reserve}
@@ -225,7 +326,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
               </Link>
             </div>
           </div>
-          <div className="anim-fade mt-8 hidden items-center justify-between border-t border-cream/15 pt-5 text-cream/80 md:flex" style={{ "--d": "1.1s" } as React.CSSProperties}>
+          <div className="mt-8 hidden items-center justify-between border-t border-cream/15 pt-5 text-cream/80 md:flex">
             <OpenBadge dict={dict} />
             <span className="t-eyebrow flex items-center gap-3">
               <span className="relative block h-8 w-px overflow-hidden bg-cream/20">

@@ -58,7 +58,7 @@ const sr = {
   },
   badge: { text: "Koncept sajt: Scale by Noon", dismiss: "Sakrij oznaku" },
   breadcrumbHome: "Početna",
-  cursor: { view: "Pogledaj", drag: "Prevuci", play: "Pusti" },
+  cursor: { view: "Pogledaj", drag: "Prevuci", play: "Pusti", swirl: "Zavrtite čašu" },
   cta: {
     eyebrow: "Sto za večeras",
     title: "Kad sunce dotakne Savu, vatra je već upaljena.",
@@ -143,7 +143,7 @@ const en: Dict = {
   },
   badge: { text: "Concept site by Scale by Noon", dismiss: "Hide label" },
   breadcrumbHome: "Home",
-  cursor: { view: "View", drag: "Drag", play: "Play" },
+  cursor: { view: "View", drag: "Drag", play: "Play", swirl: "Swirl the glass" },
   cta: {
     eyebrow: "A table for tonight",
     title: "When the sun touches the Sava, the fire is already lit.",

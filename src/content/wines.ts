@@ -95,3 +95,6 @@ export const wines: Wine[] = [
   { id: "w15", name: "Krajinski Gamay", producer: "Vinarija Timočki breg", region: "negotin", color: "red", grape: "Gamay", vintage: 2023, notes: { sr: "Trešnja, bibe, hladi se na 14°C", en: "Cherry, pepper, served chilled at 14°C" }, glass: 690, bottle: 3500 },
   { id: "w16", name: "Rogljevo Late Harvest", producer: "Zadruga Rajac", region: "negotin", color: "sweet", grape: "Smederevka", vintage: 2021, notes: { sr: "Med, suva kajsija, kandirana pomorandža", en: "Honey, dried apricot, candied orange" }, glass: 790, bottle: 5900 },
 ];
+
+/** The sommelier's bottle for each region: the one the homepage's 3D bottle (and its still) shows. */
+export const cellarPicks: Record<RegionId, string> = { "fruska-gora": "w1", sumadija: "w6", zupa: "w9", negotin: "w13" };
