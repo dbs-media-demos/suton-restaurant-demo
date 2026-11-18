@@ -28,6 +28,10 @@ export type Biz = {
   rating: { value: number; count: number } | null;
   /** A personalised preview: other pages say "comes with the full site" */
   preview: boolean;
+  /** The lead's own logo from the CRM (sanitised there): <svg viewBox> with <g data-part="mark"> and <g data-part="word">, ink in currentColor */
+  logo: { svg: string } | null;
+  /** Towns / neighbourhoods they serve, their own first (0-8; none = only `area`) */
+  areas: string[];
 };
 
 export const telOf = (biz: Pick<Biz, "phone">) => (biz.phone ? `tel:${biz.phone}` : undefined);
@@ -134,6 +138,7 @@ export function openStatus(biz: Pick<Biz, "hours" | "timezone" | "lang">, date =
 export function bizFromCrm(b: Record<string, unknown> & { address: Biz["address"] }, fallbackTz: string): Biz {
   const s = (v: unknown) => (typeof v === "string" ? v : "");
   const hours = Array.isArray(b.hours) && b.hours.length === 7 ? (b.hours as DayHours[]) : null;
+  const logoSvg = s((b.logo as { svg?: unknown } | null | undefined)?.svg).trim();
   return {
     lang: b.lang === "sr" ? "sr" : "en",
     name: s(b.name),
@@ -148,8 +153,13 @@ export function bizFromCrm(b: Record<string, unknown> & { address: Biz["address"
     hoursSummary: s(b.hoursSummary),
     rating: (b.rating as Biz["rating"]) ?? null,
     preview: true,
+    logo: logoSvg.startsWith("<svg") ? { svg: logoSvg } : null,
+    areas: Array.isArray(b.areas) ? b.areas.filter((a): a is string => typeof a === "string" && a.trim() !== "").map((a) => a.trim()).slice(0, 8) : [],
   };
 }
 
 /** "HH:MM" from minutes after midnight (for demos that store hours as minutes) */
 export const hmFromMinutes = (m?: number) => (m == null ? null : `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
+
+/** The towns a preview names: the CRM's areas, or only its own town when there are none. */
+export const areasOf = (biz: Pick<Biz, "areas" | "area">) => (biz.areas.length ? biz.areas : biz.area ? [biz.area] : []);

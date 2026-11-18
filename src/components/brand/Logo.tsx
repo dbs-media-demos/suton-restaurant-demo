@@ -26,9 +26,15 @@ export function Mark({ className, animated }: { className?: string; animated?: b
   );
 }
 
-/** Mark + wordmark. `sub` adds the "kuhinja & vino" line. */
+/** A preview's own logo from the CRM, inked in currentColor (the header's cream). */
+export function LeadLogo({ svg, className }: { svg: string; className?: string }) {
+  return <span className={clsx("lead-logo", className)} aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />;
+}
+
+/** Mark + wordmark. `sub` adds the "kuhinja & vino" line. A preview with its own logo shows that instead. */
 export function Logo({ className, sub, subText = "kuhinja & vino" }: { className?: string; sub?: boolean; subText?: string }) {
   const biz = useBiz();
+  if (biz.logo) return <LeadLogo svg={biz.logo.svg} className={clsx("lead-logo--header", className)} />;
   return (
     <span className={clsx("group inline-flex items-center gap-2.5", className)}>
       <Mark className="h-[1.9em] w-[1.9em]" animated />

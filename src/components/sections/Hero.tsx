@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useDesktopGSAP, prefersReducedMotion, PHONE, DESKTOP } from "@/lib/motion";
 import { inTurn, keepStills, readyFor3D, STILL_EVENT, wait, watchFrames } from "@/lib/live3d";
+import { loaderDone } from "@/lib/loader";
 import type { CounterHandle } from "@/components/fx/counterScene";
 import { OpenBadge } from "@/components/layout/OpenBadge";
 import { Magnetic } from "@/components/ui/Magnetic";
@@ -111,6 +112,9 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
         if ((e as Error).name === "NoGpu") keepStills("gpu");
         return; // the still stays
       }
+      if (!alive) return handle.dispose();
+      // Built and compiled behind a preview's page loader; it only fades in once that lifts
+      await loaderDone();
       if (!alive) return handle.dispose();
       scene.current = handle;
       io = new IntersectionObserver(([entry]) => {
@@ -324,25 +328,26 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
         </p>
 
         <div data-title className="wrap relative z-[2] flex h-full flex-col justify-end pb-[max(7rem,14svh)] md:pb-16">
-          <p className="t-eyebrow text-cream/85">
+          <p data-hero-rise className="t-eyebrow text-cream/85" style={{ "--d": "0.2s" } as CSSProperties}>
             {eyebrow}
           </p>
           <h1 id="hero-title" className="t-display mt-4 text-cream">
             <span className="sr-only">{h1}</span>
             <span
               aria-hidden
+              data-hero-word
               className="flex flex-wrap"
               // Long names step down so they still fit across the screen (letter-spacing is re-set: the h1's is computed at its own size)
               style={word.length > 7 ? { fontSize: `clamp(2.6rem, ${Math.max(5, 64 / word.length)}vw, 10rem)`, letterSpacing: "-0.02em" } : undefined}
             >
               {word.split("").map((ch, i) => (
-                <span key={i} className="inline-block">
+                <span key={i} className="inline-block" style={{ "--i": i } as CSSProperties}>
                   {ch === " " ? "\u00a0" : ch}
                 </span>
               ))}
             </span>
           </h1>
-          <div className="mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:justify-between">
+          <div data-hero-rise className="mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:justify-between" style={{ "--d": "0.4s" } as CSSProperties}>
             <div className="max-w-md">
               <p className="t-serif text-[clamp(1.5rem,2.6vw,2.2rem)] italic leading-tight text-candle">{tagline ?? dict.tagline}</p>
               <p className="mt-3 text-cream/85">{sub}</p>
@@ -358,7 +363,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
               </Link>
             </div>
           </div>
-          <div className="mt-8 hidden items-center justify-between border-t border-cream/15 pt-5 text-cream/80 md:flex">
+          <div data-hero-rise className="mt-8 hidden items-center justify-between border-t border-cream/15 pt-5 text-cream/80 md:flex" style={{ "--d": "0.55s" } as CSSProperties}>
             <OpenBadge dict={dict} />
             <span className="t-eyebrow flex items-center gap-3">
               <span className="relative block h-8 w-px overflow-hidden bg-cream/20">

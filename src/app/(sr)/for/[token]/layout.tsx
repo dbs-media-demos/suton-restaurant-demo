@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { BizProvider } from "@/components/preview/BizContext";
 import { PreviewGuard } from "@/components/preview/PreviewGuard";
+import { PageLoader } from "@/components/preview/PageLoader";
 import { Translate } from "@/components/preview/Translate";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { previewBiz } from "@/lib/preview";
@@ -19,6 +20,7 @@ export default async function PreviewLayout({ children, params }: { children: Re
   const biz = { ...found, lang: "sr" as const };
   return (
     <BizProvider biz={biz}>
+      {biz.logo && <PageLoader token={token} svg={biz.logo.svg} />}
       <Translate dict={srPreview} />
       <SiteChrome locale="sr" biz={biz}>
         {children}

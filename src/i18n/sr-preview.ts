@@ -5,6 +5,7 @@
 export const srPreview: Record<string, string> = {
   "Žar od bukve u kuhinji Sutona": "Žar od bukve u kuhinji",
   "Most preko Save u sumrak": "Grad u sumrak",
+  "Kad sunce dotakne Savu, vatra je već upaljena.": "Kad sunce zađe, vatra je već upaljena.",
   "180 etiketa, isključivo iz Srbije i regiona. Od Fruške gore do Negotina, od malih porodičnih podruma do vina iz amfore.":
     "Vina isključivo iz Srbije i regiona. Od Fruške gore do Negotina, od malih porodičnih podruma do vina iz amfore.",
 };

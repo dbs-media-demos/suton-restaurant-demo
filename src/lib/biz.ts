@@ -19,4 +19,6 @@ export const defaultBiz: Biz = {
   hoursSummary: "",
   rating: { ...site.rating },
   preview: false,
+  logo: null,
+  areas: [],
 };

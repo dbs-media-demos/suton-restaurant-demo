@@ -890,6 +890,176 @@ em.t-serif,
   100% { opacity: 0.45; }
 }
 
+/* ─────────────────────── lead loader ───────────────────────
+   A preview with the lead's own logo (components/preview/PageLoader, timings in lib/loader):
+   the mark draws its outlines (pathLength 1, staggered by --i), the fills come in, the name slides
+   out of a mask over a candle line, a short hold, then the curtain lifts on an arched edge at 1.55 s
+   (gone by 2.25 s). All CSS, so it runs before any JavaScript; the inline script only marks
+   <html> (data-loading while it covers the page, data-loader = out / skip-now / done / skip). */
+
+.lead-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--cream);
+  animation: ll-out 0.7s var(--ease-in-out-quart) 1.55s both;
+}
+html[data-loader="out"] .lead-loader {
+  pointer-events: none;
+}
+html[data-loader="skip-now"] .lead-loader {
+  pointer-events: none;
+  animation: ll-out-now 0.45s var(--ease-in-out-quart) both;
+}
+html[data-loader="done"] .lead-loader,
+html[data-loader="skip"] .lead-loader {
+  display: none;
+}
+@keyframes ll-out {
+  from { clip-path: inset(0 0 0 0 round 0 0 0 0 / 0 0 0 0); }
+  to { clip-path: inset(0 0 100% 0 round 0 0 50% 50% / 0 0 24vh 24vh); }
+}
+@keyframes ll-out-now {
+  from { clip-path: inset(0 0 0 0 round 0 0 0 0 / 0 0 0 0); }
+  to { clip-path: inset(0 0 100% 0 round 0 0 50% 50% / 0 0 24vh 24vh); }
+}
+
+/* Firelight behind the logo, the footer's sunset glow */
+.lead-loader__glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(130vw, 1200px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: radial-gradient(circle, rgb(227 168 87 / 0.15), rgb(110 31 42 / 0.16) 34%, transparent 66%);
+  animation: ll-glow 1.5s var(--ease-out-expo) both;
+}
+@keyframes ll-glow {
+  from { opacity: 0; transform: scale(0.82); }
+}
+
+.lead-loader__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: ll-lift 0.7s var(--ease-in-out-quart) 1.55s both;
+}
+@keyframes ll-lift {
+  to { opacity: 0; transform: translateY(-7vh); }
+}
+.lead-loader__logo {
+  width: min(64vw, 520px);
+}
+.lead-loader__logo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 46vh;
+  overflow: visible;
+}
+@media (max-width: 767.98px) {
+  .lead-loader__logo {
+    width: 78vw;
+  }
+}
+/* The horizon the name rises over */
+.lead-loader__line {
+  width: min(34vw, 260px);
+  height: 1px;
+  margin-top: clamp(1.25rem, 3.2vh, 2.25rem);
+  background: linear-gradient(to right, transparent, var(--candle), transparent);
+  opacity: 0.75;
+  animation: ll-line 1.1s var(--ease-out-expo) 0.5s both;
+}
+@keyframes ll-line {
+  from { transform: scaleX(0); opacity: 0; }
+}
+
+.lead-loader [data-part="mark"] :is(path, circle, rect, line, polyline, polygon, ellipse) {
+  /* Gap longer than the path and the start offset past it: no round-cap dot shows before the line draws */
+  stroke-dasharray: 1 1.1;
+  animation:
+    ll-draw 0.65s var(--ease-silk) calc(0.05s + min(var(--i, 0), 7) * 0.07s) both,
+    ll-fill 0.4s ease-out calc(0.72s + min(var(--i, 0), 7) * 0.04s) both;
+}
+@keyframes ll-draw {
+  from { stroke-dashoffset: 1.05; }
+  to { stroke-dashoffset: 0; }
+}
+/* To the shape's own fill-opacity */
+@keyframes ll-fill {
+  from { fill-opacity: 0; }
+}
+.lead-loader [data-part="word"] {
+  animation: ll-word 0.8s var(--ease-out-expo) 0.45s both;
+}
+@keyframes ll-word {
+  from { opacity: 0; transform: translateX(-14px); clip-path: inset(-40% 100% -40% 0); }
+  to { opacity: 1; transform: none; clip-path: inset(-40% -10% -40% 0); }
+}
+
+/* The CRM writes the demo's display face by name; next/font registers it under a hashed one */
+.lead-logo [data-part="word"] text {
+  font-family: var(--font-display-serif), Georgia, serif;
+  font-weight: 400;
+}
+
+/* In the header and footer, in currentColor */
+.lead-logo--header {
+  display: block;
+  height: 2.35em;
+  max-width: min(16rem, calc(100vw - 13.5rem));
+}
+.lead-logo--header svg,
+.lead-logo--footer svg {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  overflow: visible;
+}
+.lead-logo--footer svg {
+  width: 100%;
+  height: auto;
+  max-height: 22rem;
+}
+@media (max-width: 767.98px), (hover: none), (pointer: coarse) {
+  .lead-logo--header {
+    height: 2.1em;
+  }
+}
+
+/* The homepage's entrance after the loader (only when it showed: data-lead-intro), held while it covers the page */
+html[data-lead-intro] [data-hero-word] > span {
+  animation: letter-in 1.25s var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 60ms + 0.1s);
+}
+html[data-lead-intro] [data-hero-rise] {
+  animation: fade-up 1.1s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0s);
+}
+html[data-lead-intro] [data-film],
+html[data-lead-intro] .hero-still img {
+  animation: zoom-out 1.8s var(--ease-out-expo) both;
+}
+html[data-lead-intro] .hero-copy > * {
+  animation: fade-up 1s var(--ease-out-expo) both;
+}
+html[data-lead-intro] .hero-copy > :nth-child(2) { animation-delay: 0.07s; }
+html[data-lead-intro] .hero-copy > :nth-child(3) { animation-delay: 0.14s; }
+html[data-lead-intro] .hero-copy > :nth-child(4) { animation-delay: 0.21s; }
+html[data-lead-intro] .hero-copy > :nth-child(5) { animation-delay: 0.28s; }
+html[data-loading] :is(.anim-letter, .anim-fade, .anim-heading, .anim-zoom, [data-hero-word] > span, [data-hero-rise], [data-film], .hero-still img, .hero-copy > *, .pour, .pour *) {
+  animation-play-state: paused !important;
+}
+
 /* ─────────────────────── reduced motion ─────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -918,4 +1088,20 @@ em.t-serif,
   .pour-sparks {
     display: none;
   }
+  /* The lead loader: the finished logo for 0.6 s, then a fade (its own rules beat the * above) */
+  .lead-loader {
+    animation: ll-fade 0.45s ease 0.6s both !important;
+  }
+  .lead-loader * {
+    animation: none !important;
+  }
+  html[data-loader="skip-now"] .lead-loader {
+    animation: ll-fade-now 0.3s ease both !important;
+  }
+}
+@keyframes ll-fade {
+  to { opacity: 0; }
+}
+@keyframes ll-fade-now {
+  to { opacity: 0; }
 }

@@ -11,6 +11,8 @@ const securityHeaders = [
 const noindex = process.env.NEXT_PUBLIC_NOINDEX !== "false";
 
 const nextConfig: NextConfig = {
+  // A second dev server (NEXT_DIST_DIR=.next-dev) never touches the running demo's .next
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   devIndicators: { position: "bottom-right" },
   images: {

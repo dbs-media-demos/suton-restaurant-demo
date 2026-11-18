@@ -6,12 +6,20 @@ import { site } from "@/lib/site";
 import type { Locale } from "@/lib/i18n";
 import type { Dict } from "@/i18n/dict";
 import { ReviewCard } from "./ReviewCard";
-import type { Biz } from "@/lib/biz-core";
+import { areasOf, type Biz } from "@/lib/biz-core";
 
 /** Rating summary + an endless, hover-pausable ribbon of review cards. */
 export function ReviewsStrip({ locale, dict, eyebrow, title, href, linkLabel, biz }: { locale: Locale; dict: Dict; eyebrow: string; title: string; href: string; linkLabel: string; biz?: Biz }) {
+  // A preview's guests come from the towns it serves, in turn (only its own town when the CRM has none)
+  const places = biz ? areasOf(biz) : [];
   const list = biz
-    ? reviews.filter((r) => r.name !== "Jelena M." && r.name !== "Thomas K.").slice(0, 6).map((r) => ({ ...r, from: { sr: biz.area, en: biz.area } }))
+    ? reviews
+        .filter((r) => r.name !== "Jelena M." && r.name !== "Thomas K.")
+        .slice(0, 6)
+        .map((r, i) => {
+          const from = places[i % places.length] ?? biz.area;
+          return { ...r, from: { sr: from, en: from } };
+        })
     : reviews.slice(0, 6);
   const rating = biz ? biz.rating : site.rating;
   // Phones read the shortest three first, so all three fit on one screen

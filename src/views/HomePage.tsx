@@ -20,7 +20,7 @@ import { pageHref, pagePaths } from "@/lib/routes";
 import { buildMetadata } from "@/lib/seo";
 import type { PhotoKey } from "@/content/photos";
 import { PreviewMap } from "@/components/preview/PreviewMap";
-import { hoursGroups, num, openDays, type Biz } from "@/lib/biz-core";
+import { areasOf, hoursGroups, num, openDays, type Biz } from "@/lib/biz-core";
 import { fmtTime, hoursRows, site } from "@/lib/site";
 
 const copy = {
@@ -183,6 +183,18 @@ export const homeMetadata = (locale: Locale): Metadata =>
     photo: "/images/posters/hero.jpg",
   });
 
+/** The ring round the arch: fire, wine and the towns they serve (as many as fit; just their own when the CRM has none). */
+function ringText(biz: Biz) {
+  const places = areasOf(biz).map((a) => a.toUpperCase());
+  if (places.length < 2) return `VATRA · VINO · DRUŠTVO · ${places[0] ?? ""} · `;
+  let text = "VATRA · VINO · ";
+  for (const p of places) {
+    if (text.length + p.length + 3 > 96 && text.length > 15) break;
+    text += `${p} · `;
+  }
+  return text;
+}
+
 /** A preview's own lines: its name and area, no Sava or Savamala, numbers that are true of it. */
 function previewCopy(biz: Biz) {
   const c = copy.sr;
@@ -193,7 +205,7 @@ function previewCopy(biz: Biz) {
     phoneH1: `Restoran, ${biz.area}`,
     eyebrow: biz.area,
     sub: "Domaća kuhinja, dobra vina i sto koji vas čeka.",
-    story: { ...c.story, aside: `VATRA · VINO · DRUŠTVO · ${biz.area.toUpperCase()} · ` },
+    story: { ...c.story, aside: ringText(biz) },
     manifesto: {
       eyebrow: `${biz.shortName} · ${biz.area}`,
       text: "Ono malo vremena kada grad uspori, kuhinja zamiriše, žar zapucketa, a mi otvorimo prvu bocu. Sve ostalo je samo izgovor da ostanete do kasno.",

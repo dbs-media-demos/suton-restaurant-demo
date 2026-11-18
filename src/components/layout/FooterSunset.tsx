@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useDesktopGSAP, prefersReducedMotion } from "@/lib/motion";
 import { useBiz } from "@/components/preview/BizContext";
+import { LeadLogo } from "@/components/brand/Logo";
 
 /** Giant footer wordmark; the sun behind it sets as you reach the end of the page. */
 export function FooterSunset() {
@@ -31,6 +32,9 @@ export function FooterSunset() {
       <div data-glow className="absolute inset-x-0 bottom-0 h-3/4 bg-[radial-gradient(60%_80%_at_50%_100%,rgb(110_31_42/0.55),transparent_70%)]" />
       <div className="relative mx-auto flex w-full max-w-[100rem] justify-center">
         <div data-sun className="absolute left-1/2 top-[18%] aspect-square w-[34vw] max-w-[36rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,var(--candle-2),var(--candle)_55%,#c9793a)] opacity-90 blur-[1px]" />
+        {biz.logo ? (
+          <LeadLogo svg={biz.logo.svg} className="lead-logo--footer relative block w-[min(84vw,68rem)] px-4 pb-[4vw] pt-[6vw] text-cream" />
+        ) : (
         <p
           className={
             biz.preview
@@ -40,6 +44,7 @@ export function FooterSunset() {
         >
           {biz.preview ? biz.shortName : "Suton"}
         </p>
+        )}
       </div>
       <div className="relative -mt-[3vw] space-y-[1.2vw] pb-4">
         {[100, 72, 44].map((w) => (
