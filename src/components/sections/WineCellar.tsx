@@ -115,7 +115,7 @@ export function WineCellar({ locale, eyebrow, title, text, cta, href, rows, star
           labels: { country: t.country, volume: t.volume },
         });
       } catch (e) {
-        if ((e as Error).name === "NoGpu") keepStills();
+        if ((e as Error).name === "NoGpu") keepStills("gpu");
         return; // the still stays
       }
       if (!alive) return handle.dispose();

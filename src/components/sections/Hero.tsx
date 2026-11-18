@@ -108,7 +108,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
           onSwirl: () => setHint("done"),
         });
       } catch (e) {
-        if ((e as Error).name === "NoGpu") keepStills();
+        if ((e as Error).name === "NoGpu") keepStills("gpu");
         return; // the still stays
       }
       if (!alive) return handle.dispose();

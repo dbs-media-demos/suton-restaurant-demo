@@ -10,31 +10,47 @@ import { prefersReducedMotion } from "@/lib/motion";
  *   screen until a scene's shaders are compiled and a frame has been drawn off screen.
  * - Before three.js is even imported, a second of the page's own frames: a computer that can't
  *   hold 45 fps without the 3D keeps the stills and never downloads it.
- * - The first 2 s a scene is on screen are watched. Under about 45 fps, or a frame over 100 ms
- *   after the first quarter second, and every scene fades back to its still for the rest of the
- *   visit (sessionStorage), so the next one never starts.
+ * - The first 2 s a scene is on screen are watched (its first 5 frames, the GPU's first draws, don't
+ *   count). Under about 45 fps, a 3rd frame over 100 ms or one over 400 ms, and every scene on the
+ *   page fades back to its still, so the next one never starts. That costs only this page load:
+ *   the stills stay for the rest of the visit (sessionStorage) after two slow page loads, or at
+ *   once when there's no real GPU. One slow start used to keep them for the whole tab, so on
+ *   18 Nov every refresh got the stills.
  */
 
 /** Live 3D only for a big screen with a mouse (and no ask for less motion or data). */
 export const LIVE_3D = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 
+/** "gpu": no real GPU, stills for the visit. An old "still" here (one slow start) no longer counts. */
 const KEY = "suton:3d";
+/** Slow page loads in this tab so far: two keep the stills for the visit. */
+const SLOW_KEY = "suton:3d-slow";
+const SLOW_LIMIT = 2;
+
+// This page load ran slow: the scenes after it stay stills too (counted once per load)
+let slowHere = false;
 /** Sent when this computer turns out too slow: every live scene fades back to its still. */
 export const STILL_EVENT = "suton:3d-still";
 
 export function stillOnly() {
+  if (slowHere) return true;
   try {
-    return sessionStorage.getItem(KEY) === "still";
+    return sessionStorage.getItem(KEY) === "gpu" || Number(sessionStorage.getItem(SLOW_KEY) || 0) >= SLOW_LIMIT;
   } catch {
     return false;
   }
 }
 
-/** Remember for the visit that this computer keeps the stills, and tell the scenes already running. */
-export function keepStills() {
+/**
+ * Stills for the rest of this page load, and tell the scenes already running. No real GPU (`"gpu"`)
+ * keeps them for the visit; a slow verdict counts one slow load toward the two that do.
+ */
+export function keepStills(why: "gpu" | "slow" = "slow") {
   try {
-    sessionStorage.setItem(KEY, "still");
+    if (why === "gpu") sessionStorage.setItem(KEY, why);
+    else if (!slowHere) sessionStorage.setItem(SLOW_KEY, String(Number(sessionStorage.getItem(SLOW_KEY) || 0) + 1));
   } catch {}
+  if (why === "slow") slowHere = true;
   window.dispatchEvent(new Event(STILL_EVENT));
 }
 
@@ -67,8 +83,10 @@ export function inTurn(job: () => Promise<unknown>) {
 }
 
 const WATCH_MS = 2000;
-const WARMUP_MS = 250;
+/** The first frames pay one-off costs (a refresh's first draw took 371 ms on a PC that then ran 112 fps). */
+const GRACE_FRAMES = 5;
 const MIN_FPS = 45;
+/** A hitch or two (a font, an image decode, another tab) isn't a slow computer: the 3rd one is, or one over 4x this. */
 const MAX_FRAME_MS = 100;
 
 /**
@@ -81,6 +99,8 @@ export function watchFrames(onScreen: () => boolean, { ms = WATCH_MS, spikes = t
   let last = 0;
   let time = 0;
   let frames = 0;
+  let warm = GRACE_FRAMES;
+  let hitches = 0;
   let stopped = false;
   const reset = () => (last = 0);
   const stop = () => {
@@ -89,8 +109,9 @@ export function watchFrames(onScreen: () => boolean, { ms = WATCH_MS, spikes = t
     document.removeEventListener("visibilitychange", reset);
   };
   const verdict = new Promise<boolean>((resolve) => {
-    const done = (slow: boolean) => {
+    const done = (slow: boolean, why: string) => {
       stop();
+      performance.mark("3d:watch", { detail: { slow, why, fps: time ? Math.round((frames * 1000) / time) : 0, frames } });
       resolve(slow);
     };
     const tick = (now: number) => {
@@ -99,10 +120,18 @@ export function watchFrames(onScreen: () => boolean, { ms = WATCH_MS, spikes = t
       if (document.hidden || !onScreen()) return reset();
       if (last) {
         const dt = now - last;
-        if (spikes && time > WARMUP_MS && dt > MAX_FRAME_MS) return done(true);
+        if (warm > 0) {
+          warm--;
+          last = now;
+          return;
+        }
+        if (spikes && dt > MAX_FRAME_MS && (++hitches >= 3 || dt > MAX_FRAME_MS * 4)) return done(true, `frame ${Math.round(dt)} ms (hitch ${hitches})`);
         time += dt;
         frames++;
-        if (time >= ms) return done((frames / time) * 1000 < MIN_FPS);
+        if (time >= ms) {
+          const slow = (frames / time) * 1000 < MIN_FPS;
+          return done(slow, slow ? "fps" : "ok");
+        }
       }
       last = now;
     };
