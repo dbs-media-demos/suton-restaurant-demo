@@ -56,14 +56,15 @@ export function VideoLoop({ name, poster, posterAlt = "", sizes, className, eage
     );
     io.observe(el);
     let idle: number | undefined;
+    let timer: number | undefined;
     const go = () => {
       if (ready) return;
       ready = true;
       attach();
     };
     const onLoad = () => {
-      const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 300));
-      idle = ric(go, { timeout: 2500 }) as number;
+      if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(go, { timeout: 2500 });
+      else timer = window.setTimeout(go, 300);
     };
     if (!ready) {
       if (document.readyState === "complete") onLoad();
@@ -74,7 +75,9 @@ export function VideoLoop({ name, poster, posterAlt = "", sizes, className, eage
     return () => {
       io.disconnect();
       window.removeEventListener("load", onLoad);
-      if (idle !== undefined) (window.cancelIdleCallback ?? window.clearTimeout)(idle);
+      // each id goes back to the API that made it (idle and timer ids share small numbers)
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+      window.clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVis);
     };
   }, [name, eager]);

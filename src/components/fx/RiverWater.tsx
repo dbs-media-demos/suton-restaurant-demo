@@ -81,6 +81,7 @@ export function RiverWater({ src, aspect, waterline }: { src: string; aspect: nu
     let started = false;
     let disposed = false;
     let idleId: number | undefined;
+    let timerId: number | undefined;
     const coarse = window.matchMedia("(pointer: coarse)").matches;
     const mouse = { x: 0.5, y: 0.3, strength: 0 };
     let gl: WebGLRenderingContext | null = null;
@@ -160,8 +161,8 @@ export function RiverWater({ src, aspect, waterline }: { src: string; aspect: nu
       ([entry]) => {
         if (entry.isIntersecting) {
           if (!started) {
-            const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
-            idleId = ric(start) as number;
+            if (typeof window.requestIdleCallback === "function") idleId = window.requestIdleCallback(start);
+            else timerId = window.setTimeout(start, 200);
           } else if (gl && !running) {
             running = true;
             raf = requestAnimationFrame(frame);
@@ -190,7 +191,9 @@ export function RiverWater({ src, aspect, waterline }: { src: string; aspect: nu
       disposed = true;
       running = false;
       cancelAnimationFrame(raf);
-      if (idleId !== undefined) (window.cancelIdleCallback ?? window.clearTimeout)(idleId);
+      // each id goes back to the API that made it (idle and timer ids share small numbers)
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      window.clearTimeout(timerId);
       io.disconnect();
       parent?.removeEventListener("pointermove", onMove);
       window.removeEventListener("resize", resize);
