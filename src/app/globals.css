@@ -680,6 +680,216 @@ em.t-serif,
 }
 
 
+/* ─────────────────────── v2 hero ───────────────────────
+   /v2's centrepiece (src/components/fx/PourHero.tsx): the first glass poured in front of the
+   fire, in SVG + CSS, so it starts before any JavaScript. Each element's own style is the end
+   state (a full glass), so reduced motion simply shows that. Desktop only: phones never show it. */
+
+.pour {
+  --pour-t: 2.3s; /* the pour, from the stream landing to the glass full */
+  --pour-d: 0.75s; /* the stream reaches the bottom of the bowl */
+  --gh: 60svh; /* the glass's height */
+  background: #070504;
+}
+/* The photo's fire sits right of its middle: shifted so it burns just behind the glass */
+.pour-bg img {
+  left: 13%;
+  object-position: 50% 80%;
+  mask-image: linear-gradient(to right, transparent, #000 16%);
+}
+.pour-bg {
+  transform-origin: 72% 70%;
+}
+/* The fire breathes: two glows on different beats never quite repeat */
+.pour-flicker {
+  background:
+    radial-gradient(38% 34% at 74% 62%, rgb(255 140 50 / 0.3), transparent 70%),
+    radial-gradient(22% 20% at 70% 66%, rgb(255 190 110 / 0.22), transparent 70%);
+  mix-blend-mode: screen;
+  animation: pour-flicker 3.7s ease-in-out infinite alternate;
+}
+.pour-flicker::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(30% 26% at 78% 60%, rgb(255 120 40 / 0.26), transparent 70%);
+  animation: pour-flicker 2.3s ease-in-out -1.1s infinite alternate-reverse;
+}
+@keyframes pour-flicker {
+  0% { opacity: 0.72; }
+  23% { opacity: 1; }
+  41% { opacity: 0.8; }
+  58% { opacity: 0.95; }
+  77% { opacity: 0.7; }
+  100% { opacity: 0.9; }
+}
+/* Sparks lifting off the coals behind the glass */
+.pour-sparks i {
+  position: absolute;
+  top: calc(var(--y, 64) * 1%);
+  left: calc(var(--x) * 1%);
+  width: var(--s, 3px);
+  height: var(--s, 3px);
+  border-radius: 50%;
+  background: #ffd08a;
+  box-shadow: 0 0 6px 1px rgb(255 160 70 / 0.8), 0 0 14px 2px rgb(255 110 40 / 0.35);
+  opacity: 0;
+  animation: pour-spark var(--t) cubic-bezier(0.2, 0.6, 0.4, 1) var(--d) infinite;
+  will-change: transform, opacity;
+}
+.pour-sparks i:nth-child(1) { --x: 62; --t: 4.2s; --d: 0s; --drift: 30px; --rise: -34vh; }
+.pour-sparks i:nth-child(2) { --x: 68; --t: 5.1s; --d: 0.6s; --drift: -22px; --rise: -42vh; --s: 2px; }
+.pour-sparks i:nth-child(3) { --x: 74; --t: 3.8s; --d: 1.3s; --drift: 44px; --rise: -30vh; }
+.pour-sparks i:nth-child(4) { --x: 79; --t: 4.6s; --d: 0.3s; --drift: 18px; --rise: -46vh; --s: 2px; }
+.pour-sparks i:nth-child(5) { --x: 71; --t: 5.6s; --d: 2.1s; --drift: -36px; --rise: -38vh; }
+.pour-sparks i:nth-child(6) { --x: 65; --t: 4.4s; --d: 2.8s; --drift: 26px; --rise: -28vh; --s: 4px; }
+.pour-sparks i:nth-child(7) { --x: 83; --t: 4.9s; --d: 1.7s; --drift: -14px; --rise: -36vh; --s: 2px; }
+.pour-sparks i:nth-child(8) { --x: 76; --t: 3.6s; --d: 3.4s; --drift: 52px; --rise: -44vh; }
+.pour-sparks i:nth-child(9) { --x: 60; --t: 5.3s; --d: 1s; --drift: -20px; --rise: -32vh; --s: 2px; }
+.pour-sparks i:nth-child(10) { --x: 73; --t: 4.1s; --d: 4.1s; --drift: 12px; --rise: -50vh; }
+.pour-sparks i:nth-child(11) { --x: 69; --t: 6s; --d: 0.9s; --drift: 60px; --rise: -48vh; --s: 2px; }
+.pour-sparks i:nth-child(12) { --x: 81; --t: 4.3s; --d: 2.4s; --drift: -40px; --rise: -30vh; }
+.pour-sparks i:nth-child(13) { --x: 66; --t: 3.9s; --d: 3.1s; --drift: 34px; --rise: -40vh; --s: 2px; }
+.pour-sparks i:nth-child(14) { --x: 77; --t: 5.4s; --d: 0.15s; --drift: -26px; --rise: -36vh; }
+.pour-sparks i:nth-child(15) { --x: 63; --t: 4.7s; --d: 1.9s; --drift: 16px; --rise: -44vh; --s: 4px; }
+.pour-sparks i:nth-child(16) { --x: 85; --t: 5s; --d: 3.7s; --drift: 24px; --rise: -26vh; --s: 2px; }
+.pour-sparks i:nth-child(17) { --x: 72; --t: 3.7s; --d: 0.45s; --drift: -48px; --rise: -38vh; --s: 2px; }
+.pour-sparks i:nth-child(18) { --x: 58; --t: 5.8s; --d: 2.6s; --drift: 38px; --rise: -34vh; }
+@keyframes pour-spark {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
+  12% { opacity: 1; }
+  55% { transform: translate3d(calc(var(--drift) * 0.45), calc(var(--rise) * 0.55), 0) scale(0.8); }
+  100% { opacity: 0; transform: translate3d(var(--drift), var(--rise), 0) scale(0.3); }
+}
+
+/* The counter: dark oak catching the fire along its front edge */
+.pour-counter {
+  top: 69%;
+  bottom: -20%;
+  background:
+    linear-gradient(to bottom, rgb(255 170 90 / 0.5), rgb(255 150 70 / 0.08) 1px, transparent 2px),
+    radial-gradient(60% 40% at 70% 0%, rgb(255 120 50 / 0.2), transparent 70%),
+    repeating-linear-gradient(to bottom, rgb(255 220 180 / 0.025) 0 1px, transparent 1px 7px),
+    linear-gradient(to bottom, #3a2418, #1e130d 30%, #120b08 70%, #0c0807);
+  box-shadow: 0 -18px 40px -10px rgb(0 0 0 / 0.5);
+}
+.pour-glass {
+  height: var(--gh);
+  width: calc(var(--gh) * 200 / 490);
+  left: calc(77% - var(--gh) * 100 / 490);
+  bottom: 21.5svh;
+  will-change: transform;
+}
+.pour-hint {
+  left: calc(77% + var(--gh) * 100 / 490 + 1.75rem);
+  top: 30%;
+  white-space: nowrap;
+}
+/* No room beside the glass: over it instead */
+@media (max-width: 1279.98px) {
+  .pour-hint {
+    left: 77%;
+    top: calc(78.5% - var(--gh) - 2.5rem);
+    translate: -50% 0;
+  }
+}
+
+/* The pour: the stream lands, the wine rises (steady flow, so slower as the bowl widens), the tail falls in */
+.pour-stream path {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: -1;
+  animation: pour-stream calc(var(--pour-d) + var(--pour-t) + 0.35s) linear 0.35s both;
+}
+@keyframes pour-stream {
+  0% { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(0.5, 0, 1, 1); }
+  22% { stroke-dashoffset: 0; }
+  88% { stroke-dashoffset: 0; animation-timing-function: cubic-bezier(0.5, 0, 1, 1); }
+  100% { stroke-dashoffset: -1; }
+}
+.pour-level {
+  transform: translateY(150px);
+  animation: pour-level var(--pour-t) linear calc(0.35s + var(--pour-d)) both;
+}
+@keyframes pour-level {
+  0% { transform: translateY(264px); }
+  10% { transform: translateY(234.2px); }
+  20% { transform: translateY(220.7px); }
+  30% { transform: translateY(209.7px); }
+  40% { transform: translateY(200px); }
+  50% { transform: translateY(191px); }
+  60% { transform: translateY(182.5px); }
+  70% { transform: translateY(174.2px); }
+  80% { transform: translateY(166.1px); }
+  90% { transform: translateY(158px); }
+  100% { transform: translateY(150px); }
+}
+/* The surface is as wide as the bowl at that height */
+.pour-surface {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pour-width var(--pour-t) linear calc(0.35s + var(--pour-d)) both;
+}
+@keyframes pour-width {
+  0% { transform: scale(0.16); }
+  10% { transform: scale(0.71); }
+  20% { transform: scale(0.824); }
+  30% { transform: scale(0.889); }
+  40% { transform: scale(0.931); }
+  50% { transform: scale(0.96); }
+  60% { transform: scale(0.98); }
+  70% { transform: scale(0.992); }
+  80%, 100% { transform: scale(1); }
+}
+/* Froth while it pours, gone once it settles; then a slow sheen of firelight on the surface */
+.pour-froth {
+  opacity: 0.12;
+  animation: pour-froth calc(var(--pour-t) + 1.6s) ease-out calc(0.35s + var(--pour-d)) both;
+}
+@keyframes pour-froth {
+  0%, 70% { opacity: 0.75; }
+  100% { opacity: 0.12; }
+}
+.pour-sheen {
+  opacity: var(--sheen, 0.5);
+  animation: pour-sheen 5.5s ease-in-out 3.4s infinite alternate;
+}
+@keyframes pour-sheen {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-26px); }
+}
+.pour-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: pour-ripple 0.7s ease-out calc(0.35s + var(--pour-d)) 3 both;
+}
+.pour-ripple-2 {
+  animation-delay: calc(0.7s + var(--pour-d));
+}
+@keyframes pour-ripple {
+  0% { opacity: 0.8; transform: scale(0.15); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+.pour-caustic {
+  opacity: 0.95;
+  animation: pour-caustic var(--pour-t) ease-in calc(0.35s + var(--pour-d)) both;
+}
+@keyframes pour-caustic {
+  0% { opacity: 0; }
+  100% { opacity: 0.95; }
+}
+.pour-tears {
+  opacity: var(--tears, 0);
+}
+.pour-glint {
+  animation: pour-glint 2.9s ease-in-out infinite alternate;
+}
+@keyframes pour-glint {
+  0% { opacity: 0.35; }
+  45% { opacity: 0.7; }
+  100% { opacity: 0.45; }
+}
+
 /* ─────────────────────── reduced motion ─────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -704,7 +914,8 @@ em.t-serif,
   .marquee {
     animation: none;
   }
-  .embers {
+  .embers,
+  .pour-sparks {
     display: none;
   }
 }

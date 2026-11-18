@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Hero } from "@/components/sections/Hero";
 import { Manifesto } from "@/components/sections/Manifesto";
@@ -216,8 +217,15 @@ function previewCopy(biz: Biz) {
  * The homepage. A personalised preview (/for/<token>, Serbian only) passes a real restaurant:
  * its name runs across the hero, its rating, hours and a map of its address replace Suton's,
  * and the Sava terrace, the river chapter and the dated events step aside.
+ *
+ * `flatHero` is /v2 (and /en/v2, /for/<token>/v2): the same page without any 3D, for a slow
+ * laptop or a lead who'd rather not have it. Only the desktop hero's centrepiece changes, to what
+ * the route passes in (the glass poured in SVG + CSS, components/fx/PourHero), and the wine
+ * section's bottle stays its still, so not a byte of three.js loads. Phones get what / gives them.
+ * The routes import PourHero themselves, so / never carries its code.
  */
-export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
+export function HomePage({ locale, biz, flatHero }: { locale: Locale; biz?: Biz; flatHero?: ReactNode }) {
+  const flat = flatHero !== undefined;
   const c = biz ? previewCopy(biz) : copy[locale];
   const dict = getDictionary(locale);
   const reserve = pageHref(locale, "reservations");
@@ -238,6 +246,7 @@ export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
         story={{ ...c.story, href: pageHref(locale, "story") }}
         word={biz ? biz.shortName.toUpperCase() : undefined}
         tagline={biz ? (biz.tagline ?? "Hrana. Vino. Društvo.") : undefined}
+        stage={flatHero}
         phone={{
           h1: c.phoneH1,
           tel: biz ? biz.phone : site.phone,
@@ -258,7 +267,7 @@ export function HomePage({ locale, biz }: { locale: Locale; biz?: Biz }) {
         link={{ label: c.fire.link, href: pageHref(locale, "story") }}
       />
       <MenuPreview locale={locale} {...c.menu} href={pageHref(locale, "menu")} />
-      <WineTeaser locale={locale} {...c.wine} href={pageHref(locale, "wine")} />
+      <WineTeaser locale={locale} {...c.wine} href={pageHref(locale, "wine")} still={flat} />
       {!biz && <RiverSunset locale={locale} {...c.river} href={reserve} />}
       <ReviewsStrip locale={locale} dict={dict} eyebrow={c.reviews.eyebrow} title={c.reviews.title} href={pageHref(locale, "reviews")} linkLabel={c.reviews.link} biz={biz} />
       {!biz && <EventsStack locale={locale} {...c.events} moreHref={pageHref(locale, "events")} />}

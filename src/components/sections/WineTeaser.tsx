@@ -4,7 +4,7 @@ import { formatRsd } from "@/content/menu";
 import type { Locale } from "@/lib/i18n";
 
 /** The wine section: the four regions, and the sommelier's bottle from each in the arch. */
-export function WineTeaser({ locale, eyebrow, title, text, cta, href }: { locale: Locale; eyebrow: string; title: string; text: string; cta: string; href: string }) {
+export function WineTeaser({ locale, eyebrow, title, text, cta, href, still }: { locale: Locale; eyebrow: string; title: string; text: string; cta: string; href: string; still?: boolean }) {
   const rows: CellarRow[] = regions.map((r) => {
     const w = wines.find((x) => x.id === cellarPicks[r.id])!;
     return {
@@ -17,7 +17,7 @@ export function WineTeaser({ locale, eyebrow, title, text, cta, href }: { locale
   });
   return (
     <section className="relative py-[clamp(6rem,12vw,11rem)] phone-later [--later-h:970px] phone:order-[9] phone:py-8" aria-labelledby="wine-title">
-      <WineCellar locale={locale} eyebrow={eyebrow} title={title} text={text} cta={cta} href={href} rows={rows} start={regions.findIndex((r) => r.id === "zupa")} />
+      <WineCellar locale={locale} eyebrow={eyebrow} title={title} text={text} cta={cta} href={href} rows={rows} start={regions.findIndex((r) => r.id === "zupa")} still={still} />
     </section>
   );
 }

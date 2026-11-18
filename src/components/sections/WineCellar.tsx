@@ -27,6 +27,8 @@ type Props = {
   href: string;
   rows: CellarRow[];
   start: number;
+  /** /v2: the bottle stays its still, and three.js is never loaded. */
+  still?: boolean;
 };
 
 /** Stills of the bottle (scripts/render-3d-stills.mjs): phones and slower setups never load three.js. */
@@ -48,7 +50,7 @@ const words = {
  * On a desktop with a mouse it is a live 3D bottle that turns with the scroll and spins round to the
  * next region's wine; everywhere else a still of it. Every word on its label is in the row too.
  */
-export function WineCellar({ locale, eyebrow, title, text, cta, href, rows, start }: Props) {
+export function WineCellar({ locale, eyebrow, title, text, cta, href, rows, start, still = false }: Props) {
   const t = words[locale];
   const stage = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -63,7 +65,7 @@ export function WineCellar({ locale, eyebrow, title, text, cta, href, rows, star
   useEffect(() => {
     const canvas = canvasRef.current;
     const el = stage.current;
-    if (!canvas || !el) return;
+    if (still || !canvas || !el) return;
 
     let alive = true;
     let handle: BottleHandle | null = null;
@@ -146,7 +148,7 @@ export function WineCellar({ locale, eyebrow, title, text, cta, href, rows, star
     };
     // Built once; `rows` and the labels are read at that moment and driven by show() afterwards.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [still]);
 
   // The bottle turns a little as the section passes.
   useDesktopGSAP(

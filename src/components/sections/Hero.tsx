@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useDesktopGSAP, prefersReducedMotion, PHONE, DESKTOP } from "@/lib/motion";
 import { inTurn, keepStills, readyFor3D, STILL_EVENT, wait, watchFrames } from "@/lib/live3d";
@@ -21,6 +21,11 @@ type Props = {
   /** A preview's name and tagline instead of SUTON and the house tagline. */
   word?: string;
   tagline?: string;
+  /**
+   * /v2: what stands in the desktop frame instead of the live glass (src/components/fx/PourHero.tsx).
+   * With it, the 3D is never loaded at all; the words, buttons, arch and phone screen stay the same.
+   */
+  stage?: ReactNode;
   /** The phone's first screen: service + town, rating, today's hours and the number to call. */
   phone: {
     h1: string;
@@ -53,19 +58,20 @@ const WORD = "SUTON";
  * On scroll the camera comes round to the glass as the frame closes into the Suton arch and the
  * story opens around it.
  */
-export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, word = WORD, tagline, phone }: Props) {
+export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, word = WORD, tagline, stage, phone }: Props) {
   const root = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scene = useRef<CounterHandle | null>(null);
   const [live, setLive] = useState(false);
   const [hint, setHint] = useState<"off" | "on" | "done">("off");
+  const flat = stage !== undefined;
 
   // The glass on the counter. three.js is only imported here, after load, once the check passes
   // (src/lib/live3d.ts). The still stays until the scene is built, compiled and drawn once.
   useEffect(() => {
     const canvas = canvasRef.current;
     const el = root.current;
-    if (!canvas || !el) return;
+    if (flat || !canvas || !el) return;
 
     let alive = true;
     let handle: CounterHandle | null = null;
@@ -136,7 +142,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
       }
       scene.current = null;
     };
-  }, []);
+  }, [flat]);
 
   useDesktopGSAP(
     ({ gsap, ScrollTrigger }) => {
@@ -210,7 +216,7 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
   return (
     <section ref={root} data-hero className="relative h-[260svh] phone:h-auto" aria-labelledby="hero-title">
       <link rel="preload" as="image" type="image/avif" imageSrcSet={STILL.avif} imageSizes={STILL.sizes} media={PHONE} fetchPriority="high" />
-      <link rel="preload" as="image" type="image/avif" imageSrcSet={DESK.avif} imageSizes="max(100vw, 220vh)" media={DESKTOP} fetchPriority="high" />
+      {!flat && <link rel="preload" as="image" type="image/avif" imageSrcSet={DESK.avif} imageSizes="max(100vw, 220vh)" media={DESKTOP} fetchPriority="high" />}
 
       {/* Phones: a still of the fire, then everything a guest came for, in the first paint. */}
       <div className="hero-phone hidden phone:block">
@@ -285,19 +291,25 @@ export function Hero({ dict, h1, eyebrow, sub, reserveHref, menuHref, story, wor
         </div>
 
         <div data-frame className="absolute inset-0 bg-char will-change-[clip-path]">
-          {/* A glass of red on the kitchen counter, the grill behind: a still at once, the live scene over it. */}
-          <div data-film className="absolute inset-0">
-            <picture>
-              <source media={DESKTOP} type="image/avif" srcSet={DESK.avif} sizes="max(100vw, 220vh)" />
-              <source media={DESKTOP} type="image/webp" srcSet={DESK.webp} sizes="max(100vw, 220vh)" />
-              <img src={STILL.none} alt="" width={2640} height={1200} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[78%_50%]" />
-            </picture>
-          </div>
-          <canvas
-            ref={canvasRef}
-            aria-hidden
-            className={`absolute inset-0 h-full w-full transition-opacity duration-[1400ms] ease-out ${live ? "opacity-100" : "opacity-0"}`}
-          />
+          {flat ? (
+            stage
+          ) : (
+            <>
+              {/* A glass of red on the kitchen counter, the grill behind: a still at once, the live scene over it. */}
+              <div data-film className="absolute inset-0">
+                <picture>
+                  <source media={DESKTOP} type="image/avif" srcSet={DESK.avif} sizes="max(100vw, 220vh)" />
+                  <source media={DESKTOP} type="image/webp" srcSet={DESK.webp} sizes="max(100vw, 220vh)" />
+                  <img src={STILL.none} alt="" width={2640} height={1200} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[78%_50%]" />
+                </picture>
+              </div>
+              <canvas
+                ref={canvasRef}
+                aria-hidden
+                className={`absolute inset-0 h-full w-full transition-opacity duration-[1400ms] ease-out ${live ? "opacity-100" : "opacity-0"}`}
+              />
+            </>
+          )}
           <div data-shade className="vignette pointer-events-none absolute inset-0" />
         </div>
 
